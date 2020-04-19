@@ -1,0 +1,91 @@
+AGLTI tentative list of features
+
+Users & Authentication:
+-register user
+-authenticate email
+-login user
+-forgot password
+-reset password
+-update password
+-logout
+-delete account
+
+Profiles:
+-create/update profile
+-get logged in user's profile
+-get profile by user id
+-add job experience
+-delete job experience
+-add education
+-delete education
+-get github repos
+-set user avatar
+-get number of notifications
+
+Search:
+-search for job
+-search for developer
+
+Jobs application(dev):
+-view offers
+-view applications
+-apply for job
+-accept offer
+-reject offer
+-cancel application
+
+Jobs offer(project manager):
+-view applicants
+-view offered
+-offer user a job
+-accept application
+-reject application
+-cancel offer
+
+Project:
+-get current project
+-get project by id
+
+Project Manager in Project:
+-create project
+-add position
+-remove user from project
+-remove position
+-create task
+-send completed task back to to-do list with note
+-close task
+-close project
+
+Developer in Project:
+-push task to next stage
+-leave project
+
+Project Forum:
+-add post
+-get single post by id
+-delete post
+-make comment
+-add reply
+-notify mention
+-delete comment
+-view mentions and replies
+
+Contacts:
+-send reqeust
+-cancel outgoing request
+-view outgoing requests
+-veiw incoming requests
+-accept incoming request
+-reject incoming request
+-view contact list
+
+Private Messaging:
+-start conversation
+-view conversation thread
+-send private message
+-delete message
+-block communication
+
+Report:
+-report user
+-report project
