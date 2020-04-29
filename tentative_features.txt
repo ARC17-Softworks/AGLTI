@@ -11,7 +11,8 @@ Users & Authentication:
 -delete account
 
 Profiles:
--create/update profile
+-create profile
+-update profile
 -get logged in user's profile
 -get profile by user id
 -add job experience

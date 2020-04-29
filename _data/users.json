@@ -1,0 +1,37 @@
+[
+	{
+		"_id": "5ea0367735b1b7526a9de600",
+		"email": "k173921@nu.edu.pk",
+		"password": "123456"
+	},
+	{
+		"_id": "5ea0367735b1b7526a9de601",
+		"email": "k173915@nu.edu.pk",
+		"password": "123456"
+	},
+	{
+		"_id": "5ea0367735b1b7526a9de602",
+		"email": "k173942@nu.edu.pk",
+		"password": "123456"
+	},
+	{
+		"_id": "5ea0367735b1b7526a9de603",
+		"email": "k172376@nu.edu.pk",
+		"password": "123456"
+	},
+	{
+		"_id": "5ea0367735b1b7526a9de604",
+		"email": "k173937@nu.edu.pk",
+		"password": "123456"
+	},
+	{
+		"_id": "5ea0367735b1b7526a9de605",
+		"email": "k173864@nu.edu.pk",
+		"password": "123456"
+	},
+	{
+		"_id": "5ea0367735b1b7526a9de606",
+		"email": "k173869@nu.edu.pk",
+		"password": "123456"
+	}
+]

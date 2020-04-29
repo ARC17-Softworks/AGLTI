@@ -4,8 +4,8 @@
 	"description": "project management web app",
 	"main": "server.js",
 	"scripts": {
-		"start": "NODE_ENV=production node server",
-		"dev": "nodemon server"
+		"start": "NODE_ENV=production node server --tls-min-v1.0",
+		"dev": "nodemon server --tls-min-v1.0"
 	},
 	"repository": {
 		"type": "git",
@@ -36,6 +36,7 @@
 		"mongoose": "^5.9.2",
 		"morgan": "^1.9.1",
 		"nodemailer": "^6.4.6",
+		"request": "^2.88.2",
 		"slugify": "^1.4.0",
 		"xss-clean": "^0.1.1"
 	},
