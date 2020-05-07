@@ -6,7 +6,8 @@ const jwt = require('jsonwebtoken');
 const UserSchema = new mongoose.Schema({
 	name: {
 		type: String,
-		required: true,
+		trim: true,
+		required: [true, 'Please include your name'],
 	},
 	email: {
 		type: String,
@@ -19,10 +20,10 @@ const UserSchema = new mongoose.Schema({
 			unique: true,
 			partialFilterExpression: { email: { $type: 'string' } },
 		},
+		lowercase: true,
 	},
 	avatar: {
 		type: String,
-		// required: true,
 	},
 	password: {
 		type: String,
@@ -54,7 +55,9 @@ UserSchema.pre('save', async function (next) {
 	}
 	const initials = this.name.split(' ');
 	const randomColor = Math.floor(Math.random() * 16777215).toString(16);
-	this.avatar = `https://ui-avatars.com/api/?name=${initials[0][0]}+${initials[1][0]}&background=${randomColor}&color=fff&font-size=0.6&bold=true`;
+	this.avatar = `https://ui-avatars.com/api/?name=${initials[0][0]}+${
+		initials.length > 1 ? initials[1][0] : ''
+	}&background=${randomColor}&color=fff&font-size=0.6&bold=true`;
 });
 
 // sign JWT and return

@@ -2,28 +2,30 @@ const mongoose = require('mongoose');
 
 const ProfileSchema = new mongoose.Schema({
 	user: {
-		type: mongoose.Schema.Types.ObjectId,
+		type: mongoose.Schema.ObjectId,
 		ref: 'User',
 		required: true,
 	},
 	bio: {
 		type: String,
+		trim: true,
 	},
 	location: {
 		type: String,
+		trim: true,
 	},
 	// list of skills
 	skills: {
 		type: [String],
-		required: true,
+		required: [true, 'please add your skills'],
 	},
 	// list of all projects participated in
 	projects: [
 		{
 			_id: false,
 			proj: {
-				type: mongoose.Schema.Types.ObjectId,
-				ref: 'project',
+				type: mongoose.Schema.ObjectId,
+				ref: 'Project',
 			},
 			role: {
 				type: String,
@@ -35,28 +37,24 @@ const ProfileSchema = new mongoose.Schema({
 		{
 			title: {
 				type: String,
-				required: true,
+				trim: true,
+				required: [true, 'please add your job title'],
 			},
 			company: {
 				type: String,
-				required: true,
+				trim: true,
+				required: [true, 'please add the company name'],
 			},
 			location: {
 				type: String,
+				trim: true,
 			},
 			from: {
 				type: Date,
-				required: true,
+				required: [true, 'Please add a start date'],
 			},
 			to: {
 				type: Date,
-			},
-			current: {
-				type: Boolean,
-				default: false,
-			},
-			description: {
-				type: String,
 			},
 		},
 	],
@@ -64,29 +62,20 @@ const ProfileSchema = new mongoose.Schema({
 		{
 			school: {
 				type: String,
-				required: true,
+				trim: true,
+				required: [true, 'please add a school name'],
 			},
 			degree: {
 				type: String,
-				required: true,
-			},
-			fieldofstudy: {
-				type: String,
-				required: true,
+				trim: true,
+				required: [true, 'please add degree name'],
 			},
 			from: {
 				type: Date,
-				required: true,
+				required: [true, 'please add a start date'],
 			},
 			to: {
 				type: Date,
-			},
-			current: {
-				type: Boolean,
-				default: false,
-			},
-			description: {
-				type: String,
 			},
 		},
 	],
@@ -118,7 +107,7 @@ const ProfileSchema = new mongoose.Schema({
 	},
 	// active project being worked on
 	activeProject: {
-		type: mongoose.Schema.Types.ObjectId,
+		type: mongoose.Schema.ObjectId,
 		ref: 'Project',
 	},
 	// offers from project
@@ -126,7 +115,7 @@ const ProfileSchema = new mongoose.Schema({
 		{
 			_id: false,
 			proj: {
-				type: mongoose.Schema.Types.ObjectId,
+				type: mongoose.Schema.ObjectId,
 				ref: 'Project',
 			},
 			role: {
@@ -144,7 +133,7 @@ const ProfileSchema = new mongoose.Schema({
 		{
 			_id: false,
 			proj: {
-				type: mongoose.Schema.Types.ObjectId,
+				type: mongoose.Schema.ObjectId,
 				ref: 'Project',
 			},
 			role: {
@@ -156,17 +145,19 @@ const ProfileSchema = new mongoose.Schema({
 	// user contacts
 	contacts: [
 		{
+			_id: false,
 			contact: {
-				type: mongoose.Schema.Types.ObjectId,
+				type: mongoose.Schema.ObjectId,
 				ref: 'User',
 			},
 		},
 	],
 	// outgoing friend request
-	outgoingRequest: [
+	outgoingRequests: [
 		{
+			_id: false,
 			user: {
-				type: mongoose.Schema.Types.ObjectId,
+				type: mongoose.Schema.ObjectId,
 				ref: 'User',
 			},
 			read: {
@@ -176,10 +167,11 @@ const ProfileSchema = new mongoose.Schema({
 		},
 	],
 	// incoming friend request
-	incomingRequest: [
+	incomingRequests: [
 		{
+			_id: false,
 			user: {
-				type: mongoose.Schema.Types.ObjectId,
+				type: mongoose.Schema.ObjectId,
 				ref: 'User',
 			},
 			read: {
@@ -188,16 +180,45 @@ const ProfileSchema = new mongoose.Schema({
 			},
 		},
 	],
+	// blocked users
+	blocked: [
+		{
+			_id: false,
+			user: {
+				type: mongoose.Schema.ObjectId,
+				ref: 'User',
+			},
+		},
+	],
 	// private messages
 	messages: [
 		{
+			_id: false,
 			thread: {
-				type: mongoose.Schema.Types.ObjectId,
+				type: mongoose.Schema.ObjectId,
 				ref: 'MessageThread',
 			},
 			with: {
-				type: mongoose.Schema.Types.ObjectId,
+				type: mongoose.Schema.ObjectId,
 				ref: 'User',
+			},
+			read: {
+				type: Boolean,
+				default: false,
+			},
+		},
+	],
+	// forem mentions
+	mentions: [
+		{
+			_id: false,
+			contentId: {
+				type: mongoose.Schema.ObjectId,
+			},
+			mentionType: {
+				type: String,
+				enum: ['comment', 'post'],
+				default: 'comment',
 			},
 			read: {
 				type: Boolean,
@@ -211,4 +232,4 @@ const ProfileSchema = new mongoose.Schema({
 	},
 });
 
-module.exports = Profile = mongoose.model('Profile', ProfileSchema);
+module.exports = mongoose.model('Profile', ProfileSchema);
