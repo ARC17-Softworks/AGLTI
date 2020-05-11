@@ -315,4 +315,67 @@ exports.acceptApplication = async (req, res, next) => {
 // @desc	reject position application
 // @route	DELETE /api/v1/position/application/:positionId/:userId/reject
 // @access	Private
-exports.rejectApplication = asyncHandler(async (req, res, next) => {});
+exports.rejectApplication = asyncHandler(async (req, res, next) => {
+	const project = await Project.findById(req.project);
+	const position = await Position.findById(req.params.positionId);
+	const profile = await Profile.findOne({ user: req.params.userId });
+
+	// check if position exists
+	if (!position) {
+		return next(
+			new ErrorResponse(
+				`Resource not found with id of ${req.params.positionId}`,
+				404
+			)
+		);
+	}
+
+	// check if position belongs to project
+	if (
+		!project.openings.some(
+			(opening) => opening.position.toString() === position.id.toString()
+		)
+	) {
+		return next(new ErrorResponse('position not part of project', 404));
+	}
+
+	// check if applicant deleted application
+	const application = profile.applied.find(
+		(application) =>
+			application.position.toString() === req.params.positionId.toString()
+	);
+
+	if (!application) {
+		return next(new ErrorResponse('application missing', 404));
+	}
+
+	const applicant = project.applicants.find(
+		(application) =>
+			application.dev.toString() === req.params.userId.toString() &&
+			application.position.toString() === position.id.toString()
+	);
+
+	if (!applicant) {
+		return next(new ErrorResponse('application missing', 404));
+	}
+
+	project.applicants = project.applicants.filter(
+		(application) =>
+			!(
+				application.dev.toString() === req.params.userId.toString() &&
+				application.position.toString() === req.params.positionId.toString()
+			)
+	);
+
+	profile.applied = profile.applied.filter(
+		(application) =>
+			application.position.toString() != req.params.positionId.toString()
+	);
+
+	await profile.save();
+	await project.save();
+	res.status(200).json({
+		success: true,
+		data: project,
+	});
+});
