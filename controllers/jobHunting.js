@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
 const Profile = require('../models/Profile');
@@ -77,7 +78,7 @@ exports.apply = asyncHandler(async (req, res, next) => {
 	await profile.save();
 	await project.save();
 
-	res.status(201).json({
+	res.status(200).json({
 		success: true,
 		data: profile,
 	});
@@ -132,7 +133,7 @@ exports.cancelApplication = asyncHandler(async (req, res, next) => {
 
 	await profile.save();
 	await project.save();
-	res.status(201).json({
+	res.status(200).json({
 		success: true,
 		data: profile,
 	});

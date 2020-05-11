@@ -1,5 +1,9 @@
 const express = require('express');
-const { offer, cancelOffer } = require('../controllers/hiring');
+const {
+	offer,
+	cancelOffer,
+	acceptApplication,
+} = require('../controllers/hiring');
 const { apply, cancelApplication } = require('../controllers/jobHunting');
 
 const router = express.Router();
@@ -13,6 +17,9 @@ router
 router
 	.route('/offer/:positionId/:userId/cancel')
 	.delete(protect, authorize('OWNER'), cancelOffer);
+router
+	.route('/application/:positionId/:userId/accept')
+	.put(protect, authorize('OWNER'), acceptApplication);
 
 // user routes
 router.route('/apply/:positionId').put(protect, apply);
