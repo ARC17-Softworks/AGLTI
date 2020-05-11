@@ -5,24 +5,46 @@ ProjectSchema = new mongoose.Schema({
 		type: mongoose.Schema.ObjectId,
 		ref: 'User',
 	},
-	private: {
-		type: Boolean,
-		default: false,
-	},
-	positions: [
+	openings: [
+		{
+			_id: false,
+			position: {
+				type: mongoose.Schema.ObjectId,
+				ref: 'Position',
+			},
+		},
+	],
+	members: [
 		{
 			_id: false,
 			dev: {
 				type: mongoose.Schema.ObjectId,
 				ref: 'User',
 			},
-			role: {
+			title: {
 				type: String,
 				required: true,
 			},
-			vacancy: {
-				type: Boolean,
-				default: true,
+			skills: {
+				type: [String],
+				required: true,
+			},
+		},
+	],
+	previousMembers: [
+		{
+			_id: false,
+			dev: {
+				type: mongoose.Schema.ObjectId,
+				ref: 'User',
+			},
+			title: {
+				type: String,
+				required: true,
+			},
+			skills: {
+				type: [String],
+				required: true,
 			},
 		},
 	],
@@ -34,13 +56,13 @@ ProjectSchema = new mongoose.Schema({
 	description: {
 		type: String,
 		trim: true,
-		minlength: 100,
+		minlength: 50,
+		maxlength: 1000,
 		required: [true, 'please add a project description'],
 	},
-	status: {
-		type: String,
-		enum: ['HIRING', 'FULL', 'CLOSED'],
-		default: 'HIRING',
+	closed: {
+		type: Boolean,
+		default: false,
 	},
 	// applicants for a job role
 	applicants: [
@@ -50,9 +72,9 @@ ProjectSchema = new mongoose.Schema({
 				type: mongoose.Schema.ObjectId,
 				ref: 'User',
 			},
-			role: {
-				type: String,
-				required: true,
+			position: {
+				type: mongoose.Schema.ObjectId,
+				ref: 'Position',
 			},
 			read: {
 				type: Boolean,
@@ -68,9 +90,9 @@ ProjectSchema = new mongoose.Schema({
 				type: mongoose.Schema.ObjectId,
 				ref: 'User',
 			},
-			role: {
-				type: String,
-				required: true,
+			position: {
+				type: mongoose.Schema.ObjectId,
+				ref: 'Position',
 			},
 		},
 	],
@@ -100,6 +122,10 @@ ProjectSchema = new mongoose.Schema({
 				type: String,
 				enum: ['TODO', 'DOING', 'DONE', 'COMPLETE'],
 				default: 'TODO',
+			},
+			read: {
+				type: Boolean,
+				default: false,
 			},
 		},
 	],

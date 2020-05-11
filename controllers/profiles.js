@@ -57,10 +57,16 @@ exports.createProfile = asyncHandler(async (req, res, next) => {
 exports.getMe = asyncHandler(async (req, res, next) => {
 	const profile = await Profile.findOne(
 		{ user: req.user.id },
-		{ projects: { $slice: -5 } }
+		{ projects: { $slice: 5 } }
 	)
 		.populate('user', 'name avatar')
 		.populate('project.proj', 'title');
+
+	if (!profile) {
+		return next(
+			new ErrorResponse(`Resource not found with id of ${req.user.id}`, 404)
+		);
+	}
 
 	res.status(200).json({
 		success: true,
@@ -74,7 +80,7 @@ exports.getMe = asyncHandler(async (req, res, next) => {
 exports.getProfile = asyncHandler(async (req, res, next) => {
 	const profile = await Profile.findOne(
 		{ user: req.params.userId },
-		{ projects: { $slice: -5 } }
+		{ projects: { $slice: 5 } }
 	)
 		.select(
 			'-offers -applied -outgoingRequests -incomingRequests -contacts -blocked -messages -mentions'
@@ -94,6 +100,105 @@ exports.getProfile = asyncHandler(async (req, res, next) => {
 	res.status(200).json({
 		success: true,
 		data: profile,
+	});
+});
+
+// @desc	get current users projects
+// @route	GET /api/v1/profile/me/projects
+// @access	Private
+exports.getMyProjects = asyncHandler(async (req, res, next) => {
+	// pagination
+	const page = parseInt(req.query.page, 10) || 1;
+	const limit = 20;
+	const startIndex = (page - 1) * limit;
+	const endIndex = page * limit;
+
+	let projects = await Profile.findOne({ user: req.user.id })
+		.select('projects')
+		.populate('projects.proj', 'title');
+
+	if (!projects) {
+		return next(
+			new ErrorResponse(`Resource not found with id of ${req.user.id}`, 404)
+		);
+	}
+
+	const total = projects.length;
+
+	projects.projects = projects.projects.slice(startIndex, endIndex);
+	// pagination result
+	const pagination = {};
+
+	if (endIndex < total) {
+		pagination.next = {
+			page: page + 1,
+			limit,
+		};
+	}
+
+	if (startIndex > 0) {
+		pagination.prev = {
+			page: page - 1,
+			limit,
+		};
+	}
+
+	res.status(200).json({
+		success: true,
+		count: projects.length,
+		pagination,
+		data: projects,
+	});
+});
+
+// @desc	get projects of user by id
+// @route	GET /api/v1/profile/:userId/projects
+// @access	Private
+exports.getUserProjects = asyncHandler(async (req, res, next) => {
+	// pagination
+	const page = parseInt(req.query.page, 10) || 1;
+	const limit = 20;
+	const startIndex = (page - 1) * limit;
+	const endIndex = page * limit;
+
+	let projects = await Profile.findOne({ user: req.params.userId })
+		.select('projects')
+		.populate('projects.proj', 'title');
+
+	if (!projects) {
+		return next(
+			new ErrorResponse(
+				`Resource not found with id of ${req.params.userId}`,
+				404
+			)
+		);
+	}
+
+	const total = projects.length;
+
+	projects.projects = projects.projects.slice(startIndex, endIndex);
+	// pagination result
+	const pagination = {};
+
+	if (endIndex < total) {
+		pagination.next = {
+			page: page + 1,
+			limit,
+		};
+	}
+
+	if (startIndex > 0) {
+		pagination.prev = {
+			page: page - 1,
+			limit,
+		};
+	}
+
+	res.status(200).json({
+		success: true,
+		count: projects.length,
+		pagination,
+		data: projects,
 	});
 });
 

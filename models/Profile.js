@@ -27,9 +27,11 @@ const ProfileSchema = new mongoose.Schema({
 				type: mongoose.Schema.ObjectId,
 				ref: 'Project',
 			},
-			role: {
+			title: {
 				type: String,
-				required: true,
+			},
+			skills: {
+				type: [String],
 			},
 		},
 	],
@@ -114,13 +116,9 @@ const ProfileSchema = new mongoose.Schema({
 	offers: [
 		{
 			_id: false,
-			proj: {
+			position: {
 				type: mongoose.Schema.ObjectId,
-				ref: 'Project',
-			},
-			role: {
-				type: String,
-				required: true,
+				ref: 'Position',
 			},
 			read: {
 				type: Boolean,
@@ -132,13 +130,9 @@ const ProfileSchema = new mongoose.Schema({
 	applied: [
 		{
 			_id: false,
-			proj: {
+			position: {
 				type: mongoose.Schema.ObjectId,
-				ref: 'Project',
-			},
-			role: {
-				type: String,
-				required: true,
+				ref: 'Position',
 			},
 		},
 	],
@@ -212,13 +206,11 @@ const ProfileSchema = new mongoose.Schema({
 	mentions: [
 		{
 			_id: false,
-			contentId: {
+			post: {
 				type: mongoose.Schema.ObjectId,
 			},
-			mentionType: {
-				type: String,
-				enum: ['comment', 'post'],
-				default: 'comment',
+			comment: {
+				type: mongoose.Schema.ObjectId,
 			},
 			read: {
 				type: Boolean,

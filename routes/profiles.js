@@ -2,7 +2,9 @@ const express = require('express');
 const {
 	createProfile,
 	getMe,
+	getMyProjects,
 	getProfile,
+	getUserProjects,
 	getGithubRepos,
 	updateProfile,
 	addExperience,
@@ -17,7 +19,9 @@ const { protect } = require('../middleware/auth');
 
 router.route('/').post(protect, createProfile).put(protect, updateProfile);
 router.get('/me', protect, getMe);
+router.get('/me/projects', protect, getMyProjects);
 router.get('/:userId', protect, getProfile);
+router.get('/:userId/projects', protect, getUserProjects);
 router.put('/experience', protect, addExperience);
 router.delete('/experience/:expId', protect, removeExperience);
 router.put('/education', protect, addEducation);
