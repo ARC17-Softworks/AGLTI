@@ -5,7 +5,12 @@ const {
 	acceptApplication,
 	rejectApplication,
 } = require('../controllers/hiring');
-const { apply, cancelApplication } = require('../controllers/jobHunting');
+const {
+	apply,
+	cancelApplication,
+	acceptOffer,
+	rejectOffer,
+} = require('../controllers/jobHunting');
 
 const router = express.Router();
 
@@ -28,5 +33,7 @@ router
 // user routes
 router.route('/apply/:positionId').put(protect, apply);
 router.route('/apply/:positionId/cancel').delete(protect, cancelApplication);
+router.route('/offers/:positionId/accept').put(protect, acceptOffer);
+router.route('/offers/:positionId/reject').delete(protect, rejectOffer);
 
 module.exports = router;
