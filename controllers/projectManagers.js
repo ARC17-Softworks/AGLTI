@@ -1,4 +1,5 @@
 const ErrorResponse = require('../utils/errorResponse');
+const mongoose = require('mongoose');
 const asyncHandler = require('../middleware/async');
 const Profile = require('../models/Profile');
 const Project = require('../models/Project');
@@ -66,6 +67,102 @@ exports.addPosition = asyncHandler(async (req, res, next) => {
 // @desc	remove position
 // @route	DELETE /api/v1/projects/position/:positionId
 // @access	Private
+exports.removePosition = async (req, res, next) => {
+	const session = await mongoose.startSession();
+	session.startTransaction();
+	try {
+		const project = await Project.findById(req.project).session(session);
+		const position = await Position.findById(req.params.positionId).session(
+			session
+		);
+
+		if (!position) {
+			throw new Error('position doesnt exist');
+		}
+
+		if (position.project.toString() != req.project.toString()) {
+			throw new Error('position not part of project');
+		}
+
+		if (
+			!project.openings.some(
+				(opening) =>
+					opening.position.toString() === req.params.positionId.toString()
+			)
+		) {
+			throw new Error('position not part of project');
+		}
+
+		// check if position has any more applicants then do the following:
+
+		// (1)for each applicant of same position find profile and delete applied ref
+		for (const app of project.applicants) {
+			if (app.position.toString() === position.id.toString()) {
+				const rejpro = await Profile.findOne({ user: app.dev }).session(
+					session
+				);
+				rejpro.applied.splice(
+					rejpro.applied.findIndex(
+						(a) => a.position.toString() === req.params.positionId.toString()
+					),
+					1
+				);
+				await rejpro.save();
+			}
+		}
+
+		// (2)filter out applicants with taken position or applications of hired applicant
+		project.applicants = project.applicants.filter(
+			(application) => application.position.toString() != position.id.toString()
+		);
+
+		// (3)for each offer with same position find profile and delete offer
+		for (const offer of project.offered) {
+			if (offer.position.toString() === position.id.toString()) {
+				const rejpro = await Profile.findOne({ user: offer.dev }).session(
+					session
+				);
+				rejpro.offers.splice(
+					rejpro.offers.findIndex(
+						(o) => o.position.toString() === req.params.positionId.toString()
+					),
+					1
+				);
+				await rejpro.save();
+			}
+		}
+
+		// (4)filter out offer with taken position or offers to hired applicant
+		project.offered = project.offered.filter(
+			(offer) => offer.position.toString() != position.id.toString()
+		);
+
+		project.openings = project.openings.filter(
+			(opening) => opening.position.toString() != position.id.toString()
+		);
+
+		await project.save();
+		// throw new Error('transaction check');
+
+		// delete position
+		await Position.findByIdAndDelete(req.params.positionId).session(session);
+		await session.commitTransaction();
+		res.status(200).json({
+			success: true,
+			data: project,
+		});
+	} catch (err) {
+		await session.abortTransaction();
+		console.error(err.message);
+		console.log(err.stack.red);
+		res.status(500).json({
+			success: false,
+			error: `Server Error ${err.message}`,
+		});
+	} finally {
+		session.endSession();
+	}
+};
 
 // @desc	remove developer
 // @route	DELETE /api/v1/projects/members/:positionId
