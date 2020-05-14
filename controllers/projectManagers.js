@@ -164,6 +164,29 @@ exports.removePosition = async (req, res, next) => {
 	}
 };
 
+// @desc	assign new task to developer
+// @route	POST /api/v1/projects/tasks/assign/:userId
+// @access	Private
+exports.assignTask = asyncHandler(async (req, res, next) => {
+	const project = await Project.findById(req.project);
+	if (
+		!project.members.some(
+			(member) => member.dev.toString() === req.params.userId.toString()
+		)
+	) {
+		return next(new ErrorResponse('user not member of project', 400));
+	}
+
+	const { title, description } = req.body;
+
+	project.tasks.push({ dev: req.params.userId, title, description });
+	await project.save();
+	res.status(200).json({
+		success: true,
+		data: project,
+	});
+});
+
 // @desc	remove developer
 // @route	DELETE /api/v1/projects/members/:positionId
 // @access	Private
