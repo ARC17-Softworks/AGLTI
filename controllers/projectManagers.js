@@ -181,6 +181,62 @@ exports.assignTask = asyncHandler(async (req, res, next) => {
 
 	project.tasks.push({ dev: req.params.userId, title, description });
 	await project.save();
+	res.status(201).json({
+		success: true,
+		data: project,
+	});
+});
+
+// @desc	return task with note
+// @route	PUT /api/v1/projects/tasks/:taskId/return
+// @access	Private
+exports.returnTask = asyncHandler(async (req, res, next) => {
+	const project = await Project.findById(req.project);
+	const task = project.tasks.id(req.params.taskId);
+
+	if (!task) {
+		return next(new ErrorResponse('task not found', 404));
+	}
+	if (task.status != 'DONE') {
+		return next(new ErrorResponse('task not done can not return', 400));
+	}
+
+	const taskIndex = project.tasks.findIndex((t) => t === task);
+
+	const { note } = req.body;
+
+	if (!note) {
+		return next(new ErrorResponse('to send back task note is required', 400));
+	}
+
+	project.tasks[taskIndex].status = 'DOING';
+	project.tasks[taskIndex].note = note;
+	project.tasks[taskIndex].read = false;
+	await project.save();
+	res.status(200).json({
+		success: true,
+		data: project,
+	});
+});
+
+// @desc	close task
+// @route	PUT /api/v1/projects/tasks/:taskId/close
+// @access	Private
+exports.closeTask = asyncHandler(async (req, res, next) => {
+	const project = await Project.findById(req.project);
+	const task = project.tasks.id(req.params.taskId);
+
+	if (!task) {
+		return next(new ErrorResponse('task not found', 404));
+	}
+	if (task.status != 'DONE') {
+		return next(new ErrorResponse('task not done can not close', 400));
+	}
+
+	const taskIndex = project.tasks.findIndex((t) => t === task);
+
+	project.tasks[taskIndex].status = 'COMPLETE';
+	await project.save();
 	res.status(200).json({
 		success: true,
 		data: project,

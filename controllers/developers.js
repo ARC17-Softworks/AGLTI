@@ -27,6 +27,7 @@ exports.pushTask = asyncHandler(async (req, res, next) => {
 		project.tasks[taskIndex].status = 'DOING';
 	} else if (project.tasks[taskIndex].status === 'DOING') {
 		project.tasks[taskIndex].status = 'DONE';
+		project.tasks[taskIndex].note = undefined;
 	}
 
 	await project.save();

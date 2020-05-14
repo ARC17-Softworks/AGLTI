@@ -4,6 +4,8 @@ const {
 	addPosition,
 	removePosition,
 	assignTask,
+	returnTask,
+	closeTask,
 } = require('../controllers/projectManagers');
 const { pushTask } = require('../controllers/developers');
 
@@ -20,6 +22,12 @@ router
 router
 	.route('/tasks/assign/:userId')
 	.post(protect, authorize('OWNER'), assignTask);
+router
+	.route('/tasks/:taskId/return')
+	.put(protect, authorize('OWNER'), returnTask);
+router
+	.route('/tasks/:taskId/close')
+	.put(protect, authorize('OWNER'), closeTask);
 
 // developer routes
 router.route('/tasks/:taskId/push').put(protect, authorize('MEMBER'), pushTask);
