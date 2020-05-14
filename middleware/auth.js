@@ -56,9 +56,9 @@ exports.authorize = (role) => {
 			const project = await Project.findById(profile.activeProject);
 
 			if (
-				!project.members.some((member) => {
-					member.dev.toString() === req.user.id.toString();
-				})
+				!project.members.some(
+					(member) => member.dev.toString() === req.user.id.toString()
+				)
 			) {
 				return next(
 					new ErrorResponse('Not authorised to access this resource', 403)
@@ -95,9 +95,9 @@ exports.authorize = (role) => {
 			const project = await Project.findById(profile.activeProject);
 			if (
 				!(project.owner.toString() === req.user.id.toString()) &&
-				!project.members.some((member) => {
-					member.dev.toString() === req.user.id.toString();
-				})
+				!project.members.some(
+					(member) => member.dev.toString() === req.user.id.toString()
+				)
 			) {
 				return next(
 					new ErrorResponse('Not authorised to access this resource', 403)

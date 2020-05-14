@@ -5,6 +5,7 @@ const {
 	removePosition,
 	assignTask,
 } = require('../controllers/projectManagers');
+const { pushTask } = require('../controllers/developers');
 
 const router = express.Router();
 
@@ -19,5 +20,8 @@ router
 router
 	.route('/tasks/assign/:userId')
 	.post(protect, authorize('OWNER'), assignTask);
+
+// developer routes
+router.route('/tasks/:taskId/push').put(protect, authorize('MEMBER'), pushTask);
 
 module.exports = router;
