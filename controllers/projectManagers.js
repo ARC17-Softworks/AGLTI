@@ -244,8 +244,58 @@ exports.closeTask = asyncHandler(async (req, res, next) => {
 });
 
 // @desc	remove developer
-// @route	DELETE /api/v1/projects/members/:positionId
+// @route	DELETE /api/v1/projects/members/:userId/remove
 // @access	Private
+exports.removeDeveloper = asyncHandler(async (req, res, next) => {
+	const project = await Project.findById(req.project);
+
+	const developer = project.members.find(
+		(member) => member.dev.toString() === req.params.userId.toString()
+	);
+
+	if (!developer) {
+		return next(new ErrorResponse('user not part of project', 404));
+	}
+
+	// profile of developer
+	const profile = await Profile.findOne({ user: req.params.userId });
+
+	// if developer did not contribute to project
+	if (
+		!project.tasks.some(
+			(task) =>
+				task.dev.toString() === req.params.userId.toString() &&
+				task.status === 'COMPLETE'
+		)
+	) {
+		// remove project from profile
+		profile.projects.shift();
+	} else {
+		// add to past members
+		project.previousMembers.push(developer);
+	}
+
+	// remove from members
+	project.members = project.members.filter((member) => member != developer);
+	// unset active project
+	profile.activeProject = undefined;
+
+	// remove tasks of dev
+	project.tasks = project.tasks.filter(
+		(task) =>
+			!(
+				task.dev.toString() === req.params.userId.toString() &&
+				task.status != 'COMPLETE'
+			)
+	);
+
+	await profile.save();
+	await project.save();
+	res.status(200).json({
+		success: true,
+		data: project,
+	});
+});
 
 // @desc	close project
 // @route	DELETE /api/v1/projects/close
