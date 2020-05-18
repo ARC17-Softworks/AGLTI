@@ -7,6 +7,7 @@ const {
 	returnTask,
 	closeTask,
 	removeDeveloper,
+	closeProject,
 } = require('../controllers/projectManagers');
 const { pushTask, leaveProject } = require('../controllers/developers');
 
@@ -32,6 +33,7 @@ router
 router
 	.route('/members/:userId/remove')
 	.delete(protect, authorize('OWNER'), removeDeveloper);
+router.route('/close').delete(protect, authorize('OWNER'), closeProject);
 
 // developer routes
 router.route('/tasks/:taskId/push').put(protect, authorize('MEMBER'), pushTask);
