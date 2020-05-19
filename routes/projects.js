@@ -10,6 +10,7 @@ const {
 	closeProject,
 } = require('../controllers/projectManagers');
 const { pushTask, leaveProject } = require('../controllers/developers');
+const { currentProject } = require('../controllers/projects');
 
 const router = express.Router();
 
@@ -39,4 +40,7 @@ router.route('/close').delete(protect, authorize('OWNER'), closeProject);
 router.route('/tasks/:taskId/push').put(protect, authorize('MEMBER'), pushTask);
 router.route('/leave').delete(protect, authorize('MEMBER'), leaveProject);
 
+// view routes
+router.route('/').get(protect, authorize('BOTH'), currentProject);
+router.route('/:projectId').get(protect, currentProject);
 module.exports = router;
