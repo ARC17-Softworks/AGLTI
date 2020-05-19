@@ -25,7 +25,36 @@ exports.createProject = asyncHandler(async (req, res, next) => {
 	});
 
 	profile.projects.unshift({ proj: project.id, title: 'Project Manager' });
+
+	// set active project of employee, delete offers and applications, add to project list
+
 	profile.activeProject = project.id;
+	const positionsRemove = profile.applied.concat(profile.offers);
+	const projectsRemove = [];
+	for (const x of positionsRemove) {
+		const pos = await Position.findById(x.position);
+		const pro = await Project.findById(pos.project);
+		if (
+			!projectsRemove.some((y) => y.project.toString() === pro.id.toString()) &&
+			pro.id.toString() != project.id.toString()
+		) {
+			projectsRemove.push({ project: pro.id });
+		}
+	}
+
+	for (const proj of projectsRemove) {
+		const rejproj = await Project.findById(proj.project);
+		rejproj.applicants = rejproj.applicants.filter(
+			(a) => a.dev.toString() != req.user.id.toString()
+		);
+		rejproj.offered = rejproj.offered.filter(
+			(o) => o.dev.toString() != req.user.id.toString()
+		);
+		await rejproj.save();
+	}
+
+	profile.offers = [];
+	profile.applied = [];
 	await profile.save();
 
 	res.status(201).json({
