@@ -279,6 +279,8 @@ exports.removeDeveloper = asyncHandler(async (req, res, next) => {
 	project.members = project.members.filter((member) => member != developer);
 	// unset active project
 	profile.activeProject = undefined;
+	// clear project forun mentions
+	profile.mentions = [];
 
 	// remove tasks of dev
 	project.tasks = project.tasks.filter(
@@ -382,6 +384,8 @@ exports.closeProject = async (req, res, next) => {
 
 			// unset active project
 			memprofile.activeProject = undefined;
+			// clear project forun mentions
+			profile.mentions = [];
 
 			await memprofile.save();
 		}

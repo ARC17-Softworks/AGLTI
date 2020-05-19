@@ -202,7 +202,7 @@ const ProfileSchema = new mongoose.Schema({
 			},
 		},
 	],
-	// forem mentions
+	// forum mentions
 	mentions: [
 		{
 			_id: false,

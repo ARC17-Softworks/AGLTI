@@ -60,7 +60,21 @@ exports.getMe = asyncHandler(async (req, res, next) => {
 		{ projects: { $slice: 5 } }
 	)
 		.populate('user', 'name avatar')
-		.populate('project.proj', 'title');
+		.populate('project.proj', 'title')
+		.populate('activeProject', 'title')
+		.populate({
+			path: 'offers.position',
+			populate: { path: 'project', select: 'title' },
+		})
+		.populate({
+			path: 'applied.position',
+			populate: { path: 'project', select: 'title' },
+		})
+		.populate('contacts.contact', 'name avatar')
+		.populate('outgoingRequests.user', 'name avatar')
+		.populate('incomingRequests.user', 'name avatar')
+		.populate('blocked.user', 'name avatar')
+		.populate('messages.with', 'name avatar');
 
 	if (!profile) {
 		return next(
@@ -86,7 +100,8 @@ exports.getProfile = asyncHandler(async (req, res, next) => {
 			'-offers -applied -outgoingRequests -incomingRequests -contacts -blocked -messages -mentions'
 		)
 		.populate('user', 'name avatar')
-		.populate('project.proj', 'title');
+		.populate('project.proj', 'title')
+		.populate('activeProject', 'title');
 
 	if (!profile) {
 		return next(
