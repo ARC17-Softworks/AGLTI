@@ -40,7 +40,7 @@ exports.currentProject = asyncHandler(async (req, res, next) => {
 // @desc	get project by id
 // @route	GET /api/v1/projects/:projectId
 // @access	Private
-exports.currentProject = asyncHandler(async (req, res, next) => {
+exports.getProject = asyncHandler(async (req, res, next) => {
 	const project = await Project.findById(req.params.projectId)
 		.select('-posts -openings -applicants -offered -tasks')
 		.populate('owner', 'name avatar')

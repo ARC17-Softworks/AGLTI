@@ -23,6 +23,7 @@ const auth = require('./routes/auth');
 const profiles = require('./routes/profiles');
 const projects = require('./routes/projects');
 const positions = require('./routes/positions');
+const search = require('./routes/search');
 
 const app = express();
 
@@ -65,6 +66,7 @@ app.use('/api/v1/auth', auth);
 app.use('/api/v1/profiles', profiles);
 app.use('/api/v1/projects', projects);
 app.use('/api/v1/positions', positions);
+app.use('/api/v1/search', search);
 
 app.use(errorHandler);
 
