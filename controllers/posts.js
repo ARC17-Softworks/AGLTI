@@ -203,7 +203,7 @@ exports.getPost = asyncHandler(async (req, res, next) => {
 		);
 	}
 
-	res.status(201).json({
+	res.status(200).json({
 		success: true,
 		data: post,
 	});
@@ -213,7 +213,7 @@ exports.getPost = asyncHandler(async (req, res, next) => {
 // @route	GET /api/v1/posts/:postId/comments/:commentId
 // @access	Private
 exports.getComment = asyncHandler(async (req, res, next) => {
-	let project = await Project.findById(req.project)
+	const project = await Project.findById(req.project)
 		.select('posts')
 		.populate('posts.comments.user', 'name avatar');
 	const post = project.posts.id(req.params.postId);
@@ -236,7 +236,7 @@ exports.getComment = asyncHandler(async (req, res, next) => {
 		);
 	}
 
-	res.status(201).json({
+	res.status(200).json({
 		success: true,
 		data: comment,
 	});
@@ -245,10 +245,17 @@ exports.getComment = asyncHandler(async (req, res, next) => {
 // @desc	notify mention to user
 // @route	PUT /api/v1/posts/mention/:userId/:postId/:commentId
 // @access	Private
-exports.getComment = asyncHandler(async (req, res, next) => {
-	let project = await Project.findById(req.project)
-		.select('posts')
-		.populate('posts.comments.user', 'name avatar');
+exports.notifyMention = asyncHandler(async (req, res, next) => {
+	const project = await Project.findById(req.project).select('posts');
+	const profile = await Profile.findOne({ user: req.params.userId });
+	if (!profile) {
+		return next(
+			new ErrorResponse(
+				`Resource not found with id of ${req.params.userId}`,
+				404
+			)
+		);
+	}
 	const post = project.posts.id(req.params.postId);
 	if (!post) {
 		return next(
@@ -259,18 +266,25 @@ exports.getComment = asyncHandler(async (req, res, next) => {
 		);
 	}
 
-	const comment = post.comments.id(req.params.commentId);
-	if (!comment) {
-		return next(
-			new ErrorResponse(
-				`Resource not found with id of ${req.params.commentId}`,
-				404
-			)
-		);
+	const mention = { post };
+
+	if (req.params.commentId) {
+		const comment = post.comments.id(req.params.commentId);
+		if (!comment) {
+			return next(
+				new ErrorResponse(
+					`Resource not found with id of ${req.params.commentId}`,
+					404
+				)
+			);
+		}
+		mention.comment = comment;
 	}
 
-	res.status(201).json({
+	profile.mentions.push(mention);
+	await profile.save();
+	res.status(200).json({
 		success: true,
-		data: comment,
+		data: post,
 	});
 });

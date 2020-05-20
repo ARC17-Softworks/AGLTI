@@ -7,6 +7,7 @@ const {
 	getPosts,
 	getPost,
 	getComment,
+	notifyMention,
 } = require('../controllers/posts');
 
 const router = express.Router();
@@ -28,5 +29,11 @@ router
 	.route('/:postId/comments/:commentId')
 	.get(protect, authorize('BOTH'), getComment)
 	.delete(protect, authorize('BOTH'), deleteComment);
+router
+	.route('/mention/:userId/:postId/:commentId')
+	.put(protect, authorize('BOTH'), notifyMention);
+router
+	.route('/mention/:userId/:postId')
+	.put(protect, authorize('BOTH'), notifyMention);
 
 module.exports = router;
