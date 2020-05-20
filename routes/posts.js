@@ -6,6 +6,7 @@ const {
 	deleteComment,
 	getPosts,
 	getPost,
+	getComment,
 } = require('../controllers/posts');
 
 const router = express.Router();
@@ -25,6 +26,7 @@ router
 	.post(protect, authorize('BOTH'), createComment);
 router
 	.route('/:postId/comments/:commentId')
+	.get(protect, authorize('BOTH'), getComment)
 	.delete(protect, authorize('BOTH'), deleteComment);
 
 module.exports = router;

@@ -6,7 +6,7 @@ const Project = require('../models/Project');
 const Position = require('../models/Position');
 
 // @desc	create a post
-// @route	POST /api/v1/projects/posts
+// @route	POST /api/v1/posts
 // @access	Private
 exports.createPost = asyncHandler(async (req, res, next) => {
 	const project = await Project.findById(req.project);
@@ -21,7 +21,7 @@ exports.createPost = asyncHandler(async (req, res, next) => {
 });
 
 // @desc	delete post
-// @route	POST /api/v1/projects/posts/:postId
+// @route	POST /api/v1/posts/:postId
 // @access	Private
 exports.deletePost = asyncHandler(async (req, res, next) => {
 	const project = await Project.findById(req.project);
@@ -57,7 +57,7 @@ exports.deletePost = asyncHandler(async (req, res, next) => {
 });
 
 // @desc	comment on a post
-// @route	POST /api/v1/projects/posts/:postId/comments
+// @route	POST /api/v1/posts/:postId/comments
 // @access	Private
 exports.createComment = asyncHandler(async (req, res, next) => {
 	const project = await Project.findById(req.project);
@@ -86,7 +86,7 @@ exports.createComment = asyncHandler(async (req, res, next) => {
 });
 
 // @desc	delete comment
-// @route	POST /api/v1/projects/posts/:postId/comments/:commentId
+// @route	POST /api/v1/posts/:postId/comments/:commentId
 // @access	Private
 exports.deleteComment = asyncHandler(async (req, res, next) => {
 	const project = await Project.findById(req.project);
@@ -135,7 +135,7 @@ exports.deleteComment = asyncHandler(async (req, res, next) => {
 });
 
 // @desc	get all posts
-// @route	GET /api/v1/projects/posts/
+// @route	GET /api/v1/posts/
 // @access	Private
 exports.getPosts = asyncHandler(async (req, res, next) => {
 	let posts = await Project.findById(req.project)
@@ -206,5 +206,71 @@ exports.getPost = asyncHandler(async (req, res, next) => {
 	res.status(201).json({
 		success: true,
 		data: post,
+	});
+});
+
+// @desc	get single comment by id
+// @route	GET /api/v1/posts/:postId/comments/:commentId
+// @access	Private
+exports.getComment = asyncHandler(async (req, res, next) => {
+	let project = await Project.findById(req.project)
+		.select('posts')
+		.populate('posts.comments.user', 'name avatar');
+	const post = project.posts.id(req.params.postId);
+	if (!post) {
+		return next(
+			new ErrorResponse(
+				`Resource not found with id of ${req.params.postId}`,
+				404
+			)
+		);
+	}
+
+	const comment = post.comments.id(req.params.commentId);
+	if (!comment) {
+		return next(
+			new ErrorResponse(
+				`Resource not found with id of ${req.params.commentId}`,
+				404
+			)
+		);
+	}
+
+	res.status(201).json({
+		success: true,
+		data: comment,
+	});
+});
+
+// @desc	notify mention to user
+// @route	PUT /api/v1/posts/mention/:userId/:postId/:commentId
+// @access	Private
+exports.getComment = asyncHandler(async (req, res, next) => {
+	let project = await Project.findById(req.project)
+		.select('posts')
+		.populate('posts.comments.user', 'name avatar');
+	const post = project.posts.id(req.params.postId);
+	if (!post) {
+		return next(
+			new ErrorResponse(
+				`Resource not found with id of ${req.params.postId}`,
+				404
+			)
+		);
+	}
+
+	const comment = post.comments.id(req.params.commentId);
+	if (!comment) {
+		return next(
+			new ErrorResponse(
+				`Resource not found with id of ${req.params.commentId}`,
+				404
+			)
+		);
+	}
+
+	res.status(201).json({
+		success: true,
+		data: comment,
 	});
 });
