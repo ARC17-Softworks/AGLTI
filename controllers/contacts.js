@@ -20,6 +20,14 @@ exports.sendRequestId = asyncHandler(async (req, res, next) => {
 	}
 
 	if (
+		profile.contacts.some(
+			(contact) => contact.contact.toString() === req.params.userId.toString()
+		)
+	) {
+		return next(new ErrorResponse('user already in contacts', 400));
+	}
+
+	if (
 		profile.outgoingRequests.some(
 			(request) => request.user.toString() === req.params.userId.toString()
 		)
@@ -70,6 +78,14 @@ exports.sendRequestEmail = asyncHandler(async (req, res, next) => {
 		return next(
 			new ErrorResponse(`Resource not found with id of ${recieverUser.id}`, 404)
 		);
+	}
+
+	if (
+		profile.contacts.some(
+			(contact) => contact.contact.toString() === req.params.userId.toString()
+		)
+	) {
+		return next(new ErrorResponse('user already in contacts', 400));
 	}
 
 	if (
@@ -149,6 +165,39 @@ exports.rejectRequest = asyncHandler(async (req, res, next) => {
 	sender.outgoingRequests = sender.outgoingRequests.filter(
 		(request) => request.user.toString() != req.user.id.toString()
 	);
+
+	await profile.save();
+	await sender.save();
+	res.status(200).json({
+		success: true,
+		data: profile,
+	});
+});
+
+// @desc	accept incoming request
+// @route	PUT /api/v1/contacts/accept/:userId
+// @access	Private
+exports.acceptRequest = asyncHandler(async (req, res, next) => {
+	const profile = await Profile.findOne({ user: req.user.id });
+	const sender = await Profile.findOne({ user: req.params.userId });
+
+	if (
+		!profile.incomingRequests.some(
+			(request) => request.user.toString() === req.params.userId.toString()
+		)
+	) {
+		return next(new ErrorResponse('requst not found', 404));
+	}
+
+	profile.incomingRequests = profile.incomingRequests.filter(
+		(request) => request.user.toString() != req.params.userId.toString()
+	);
+	sender.outgoingRequests = sender.outgoingRequests.filter(
+		(request) => request.user.toString() != req.user.id.toString()
+	);
+
+	profile.contacts.push({ contact: req.params.userId });
+	sender.contacts.push({ contact: req.user.id });
 
 	await profile.save();
 	await sender.save();
