@@ -97,3 +97,63 @@ exports.sendRequestEmail = asyncHandler(async (req, res, next) => {
 		data: profile,
 	});
 });
+
+// @desc	cancel outgoing request
+// @route	DELETE /api/v1/contacts/cancel/:userId
+// @access	Private
+exports.cancelRequest = asyncHandler(async (req, res, next) => {
+	const profile = await Profile.findOne({ user: req.user.id });
+	const reciever = await Profile.findOne({ user: req.params.userId });
+
+	if (
+		!profile.outgoingRequests.some(
+			(request) => request.user.toString() === req.params.userId.toString()
+		)
+	) {
+		return next(new ErrorResponse('requst not found', 404));
+	}
+
+	profile.outgoingRequests = profile.outgoingRequests.filter(
+		(request) => request.user.toString() != req.params.userId.toString()
+	);
+	reciever.incomingRequests = reciever.incomingRequests.filter(
+		(request) => request.user.toString() != req.user.id.toString()
+	);
+
+	await profile.save();
+	await reciever.save();
+	res.status(200).json({
+		success: true,
+		data: profile,
+	});
+});
+
+// @desc	reject incoming request
+// @route	DELETE /api/v1/contacts/reject/:userId
+// @access	Private
+exports.rejectRequest = asyncHandler(async (req, res, next) => {
+	const profile = await Profile.findOne({ user: req.user.id });
+	const sender = await Profile.findOne({ user: req.params.userId });
+
+	if (
+		!profile.incomingRequests.some(
+			(request) => request.user.toString() === req.params.userId.toString()
+		)
+	) {
+		return next(new ErrorResponse('requst not found', 404));
+	}
+
+	profile.incomingRequests = profile.incomingRequests.filter(
+		(request) => request.user.toString() != req.params.userId.toString()
+	);
+	sender.outgoingRequests = sender.outgoingRequests.filter(
+		(request) => request.user.toString() != req.user.id.toString()
+	);
+
+	await profile.save();
+	await sender.save();
+	res.status(200).json({
+		success: true,
+		data: profile,
+	});
+});
