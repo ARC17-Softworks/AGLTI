@@ -14,13 +14,6 @@ const { pushTask, leaveProject } = require('../controllers/developers');
 
 const { currentProject, getProject } = require('../controllers/projects');
 
-const {
-	createPost,
-	deletePost,
-	createComment,
-	deleteComment,
-} = require('../controllers/forums');
-
 const router = express.Router();
 
 const { protect, authorize } = require('../middleware/auth');
@@ -52,15 +45,5 @@ router.route('/leave').delete(protect, authorize('MEMBER'), leaveProject);
 // view routes
 router.route('/').get(protect, authorize('BOTH'), currentProject);
 router.route('/:projectId').get(protect, getProject);
-
-// forum routes
-router.route('/posts').post(protect, authorize('BOTH'), createPost);
-router.route('/posts/:postId').delete(protect, authorize('BOTH'), deletePost);
-router
-	.route('/posts/:postId/comments')
-	.post(protect, authorize('BOTH'), createComment);
-router
-	.route('/posts/:postId/comments/:commentId')
-	.delete(protect, authorize('BOTH'), deleteComment);
 
 module.exports = router;

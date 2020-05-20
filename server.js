@@ -24,6 +24,7 @@ const profiles = require('./routes/profiles');
 const projects = require('./routes/projects');
 const positions = require('./routes/positions');
 const search = require('./routes/search');
+const posts = require('./routes/posts');
 
 const app = express();
 
@@ -67,6 +68,7 @@ app.use('/api/v1/profiles', profiles);
 app.use('/api/v1/projects', projects);
 app.use('/api/v1/positions', positions);
 app.use('/api/v1/search', search);
+app.use('/api/v1/posts', posts);
 
 app.use(errorHandler);
 

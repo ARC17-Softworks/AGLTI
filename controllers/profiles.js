@@ -158,10 +158,13 @@ exports.getMyProjects = asyncHandler(async (req, res, next) => {
 		};
 	}
 
+	pagination.pages = Math.ceil(total / limit);
+
 	res.status(200).json({
 		success: true,
 		count: projects.length,
 		pagination,
+		total,
 		data: projects,
 	});
 });
@@ -209,10 +212,13 @@ exports.getUserProjects = asyncHandler(async (req, res, next) => {
 		};
 	}
 
+	pagination.pages = Math.ceil(total / limit);
+
 	res.status(200).json({
 		success: true,
 		count: projects.length,
 		pagination,
+		total,
 		data: projects,
 	});
 });

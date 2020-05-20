@@ -133,3 +133,53 @@ exports.deleteComment = asyncHandler(async (req, res, next) => {
 		data: project,
 	});
 });
+
+// @desc	get all posts
+// @route	GET /api/v1/projects/posts/
+// @access	Private
+exports.getPosts = asyncHandler(async (req, res, next) => {
+	let posts = await Project.findById(req.project)
+		.select('posts')
+		.populate('posts.user', 'name avatar');
+	posts = posts.posts;
+
+	// pagination
+	const pagination = {};
+	const page = parseInt(req.query.page, 10) || 1;
+	const limit = 20;
+	const startIndex = (page - 1) * limit;
+	const endIndex = page * limit;
+	const total = posts.length;
+
+	posts = posts.slice(startIndex, endIndex);
+	posts = posts.map((post) => ({
+		user: post.user,
+		title: post.title,
+		text: post.text,
+		date: post.date,
+	}));
+
+	if (endIndex < total) {
+		pagination.next = {
+			page: page + 1,
+			limit,
+		};
+	}
+
+	if (startIndex > 0) {
+		pagination.prev = {
+			page: page - 1,
+			limit,
+		};
+	}
+
+	pagination.pages = Math.ceil(total / limit);
+
+	res.status(200).json({
+		success: true,
+		count: posts.length,
+		pagination,
+		total,
+		data: posts,
+	});
+});
