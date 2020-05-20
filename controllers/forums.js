@@ -12,8 +12,8 @@ exports.createPost = asyncHandler(async (req, res, next) => {
 	const project = await Project.findById(req.project);
 	const { title, text } = req.body;
 	project.posts.unshift({ user: req.user.id, title, text });
-	await project.save();
 
+	await project.save();
 	res.status(201).json({
 		success: true,
 		data: project,
@@ -28,7 +28,10 @@ exports.deletePost = asyncHandler(async (req, res, next) => {
 	const delpost = project.posts.id(req.params.postId);
 	if (!delpost) {
 		return next(
-			new ErrorResponse(`Resource not found with id of ${req.user.postId}`, 404)
+			new ErrorResponse(
+				`Resource not found with id of ${req.params.postId}`,
+				404
+			)
 		);
 	}
 
@@ -45,8 +48,8 @@ exports.deletePost = asyncHandler(async (req, res, next) => {
 	project.posts = project.posts.filter(
 		(post) => post.id.toString() != delpost.id.toString()
 	);
-	await project.save();
 
+	await project.save();
 	res.status(200).json({
 		success: true,
 		data: project,
@@ -61,7 +64,10 @@ exports.createComment = asyncHandler(async (req, res, next) => {
 	const commpost = project.posts.id(req.params.postId);
 	if (!commpost) {
 		return next(
-			new ErrorResponse(`Resource not found with id of ${req.user.postId}`, 404)
+			new ErrorResponse(
+				`Resource not found with id of ${req.params.postId}`,
+				404
+			)
 		);
 	}
 	const postIndex = project.posts.findIndex(
@@ -71,9 +77,58 @@ exports.createComment = asyncHandler(async (req, res, next) => {
 		user: req.user.id,
 		text: req.body.text,
 	});
-	await project.save();
 
+	await project.save();
 	res.status(201).json({
+		success: true,
+		data: project,
+	});
+});
+
+// @desc	delete comment
+// @route	POST /api/v1/projects/posts/:postId/comments/:commentId
+// @access	Private
+exports.deleteComment = asyncHandler(async (req, res, next) => {
+	const project = await Project.findById(req.project);
+	const delpost = project.posts.id(req.params.postId);
+	if (!delpost) {
+		return next(
+			new ErrorResponse(
+				`Resource not found with id of ${req.params.postId}`,
+				404
+			)
+		);
+	}
+	const delcomment = delpost.comments.id(req.params.commentId);
+	if (!delcomment) {
+		return next(
+			new ErrorResponse(
+				`Resource not found with id of ${req.params.commentId}`,
+				404
+			)
+		);
+	}
+
+	// only user who posted comment or project manager can delete comment
+	if (
+		delcomment.user.toString() != req.user.id.toString() &&
+		project.owner.toString() != req.user.id.toString()
+	) {
+		return next(
+			new ErrorResponse('Not authorised to access this resource', 401)
+		);
+	}
+
+	const postIndex = project.posts.findIndex(
+		(post) => post.id.toString() === req.params.postId.toString()
+	);
+
+	project.posts[postIndex].comments = project.posts[postIndex].comments.filter(
+		(comment) => comment.id.toString() != delcomment.id.toString()
+	);
+
+	await project.save();
+	res.status(200).json({
 		success: true,
 		data: project,
 	});

@@ -18,6 +18,7 @@ const {
 	createPost,
 	deletePost,
 	createComment,
+	deleteComment,
 } = require('../controllers/forums');
 
 const router = express.Router();
@@ -58,5 +59,8 @@ router.route('/posts/:postId').delete(protect, authorize('BOTH'), deletePost);
 router
 	.route('/posts/:postId/comments')
 	.post(protect, authorize('BOTH'), createComment);
+router
+	.route('/posts/:postId/comments/:commentId')
+	.delete(protect, authorize('BOTH'), deleteComment);
 
 module.exports = router;
