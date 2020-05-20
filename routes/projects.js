@@ -14,7 +14,7 @@ const { pushTask, leaveProject } = require('../controllers/developers');
 
 const { currentProject, getProject } = require('../controllers/projects');
 
-const { createPost } = require('../controllers/forums');
+const { createPost, deletePost } = require('../controllers/forums');
 
 const router = express.Router();
 
@@ -50,4 +50,5 @@ router.route('/:projectId').get(protect, getProject);
 
 // forum routes
 router.route('/posts').post(protect, authorize('BOTH'), createPost);
+router.route('/posts/:postId').delete(protect, authorize('BOTH'), deletePost);
 module.exports = router;
