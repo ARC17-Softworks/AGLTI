@@ -52,3 +52,29 @@ exports.deletePost = asyncHandler(async (req, res, next) => {
 		data: project,
 	});
 });
+
+// @desc	comment on a post
+// @route	POST /api/v1/projects/posts/:postId/comments
+// @access	Private
+exports.createComment = asyncHandler(async (req, res, next) => {
+	const project = await Project.findById(req.project);
+	const commpost = project.posts.id(req.params.postId);
+	if (!commpost) {
+		return next(
+			new ErrorResponse(`Resource not found with id of ${req.user.postId}`, 404)
+		);
+	}
+	const postIndex = project.posts.findIndex(
+		(post) => post.id.toString() === req.params.postId.toString()
+	);
+	project.posts[postIndex].comments.push({
+		user: req.user.id,
+		text: req.body.text,
+	});
+	await project.save();
+
+	res.status(201).json({
+		success: true,
+		data: project,
+	});
+});
