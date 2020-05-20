@@ -153,6 +153,7 @@ exports.getPosts = asyncHandler(async (req, res, next) => {
 
 	posts = posts.slice(startIndex, endIndex);
 	posts = posts.map((post) => ({
+		_id: post.id,
 		user: post.user,
 		title: post.title,
 		text: post.text,
@@ -181,5 +182,29 @@ exports.getPosts = asyncHandler(async (req, res, next) => {
 		pagination,
 		total,
 		data: posts,
+	});
+});
+
+// @desc	get single post by id
+// @route	GET /api/v1/posts/:postId
+// @access	Private
+exports.getPost = asyncHandler(async (req, res, next) => {
+	let project = await Project.findById(req.project)
+		.select('posts')
+		.populate('posts.user', 'name avatar')
+		.populate('posts.comments.user', 'name avatar');
+	const post = project.posts.id(req.params.postId);
+	if (!post) {
+		return next(
+			new ErrorResponse(
+				`Resource not found with id of ${req.params.postId}`,
+				404
+			)
+		);
+	}
+
+	res.status(201).json({
+		success: true,
+		data: post,
 	});
 });
