@@ -8,6 +8,7 @@ const {
 	cancelRequest,
 	rejectRequest,
 	acceptRequest,
+	removeContact,
 } = require('../controllers/contacts');
 
 const { protect } = require('../middleware/auth');
@@ -17,5 +18,6 @@ router.route('/invite').put(protect, sendRequestEmail);
 router.route('/cancel/:userId').delete(protect, cancelRequest);
 router.route('/reject/:userId').delete(protect, rejectRequest);
 router.route('/accept/:userId').put(protect, acceptRequest);
+router.route('/remove/:userId').delete(protect, removeContact);
 
 module.exports = router;

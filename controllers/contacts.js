@@ -206,3 +206,33 @@ exports.acceptRequest = asyncHandler(async (req, res, next) => {
 		data: profile,
 	});
 });
+
+// @desc	remove contact
+// @route	DELETE /api/v1/contacts/remove/:userId
+// @access	Private
+exports.removeContact = asyncHandler(async (req, res, next) => {
+	const profile = await Profile.findOne({ user: req.user.id });
+	const contactProfile = await Profile.findOne({ user: req.params.userId });
+
+	if (
+		!profile.contacts.some(
+			(contact) => contact.contact.toString() === req.params.userId.toString()
+		)
+	) {
+		return next(new ErrorResponse('contact not found', 404));
+	}
+
+	profile.contacts = profile.contacts.filter(
+		(contact) => contact.contact.toString() != req.params.userId.toString()
+	);
+	contactProfile.contacts = contactProfile.contacts.filter(
+		(contact) => contact.contact.toString() != req.user.id.toString()
+	);
+
+	await profile.save();
+	await contactProfile.save();
+	res.status(200).json({
+		success: true,
+		data: profile,
+	});
+});
