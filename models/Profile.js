@@ -154,10 +154,6 @@ const ProfileSchema = new mongoose.Schema({
 				type: mongoose.Schema.ObjectId,
 				ref: 'User',
 			},
-			read: {
-				type: Boolean,
-				default: false,
-			},
 		},
 	],
 	// incoming friend request
