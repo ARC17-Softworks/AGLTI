@@ -28,6 +28,14 @@ exports.sendRequestId = asyncHandler(async (req, res, next) => {
 	}
 
 	if (
+		profile.blocked.some(
+			(user) => user.user.toString() === req.params.userId.toString()
+		)
+	) {
+		return next(new ErrorResponse('user is blocked', 400));
+	}
+
+	if (
 		profile.outgoingRequests.some(
 			(request) => request.user.toString() === req.params.userId.toString()
 		)
@@ -82,10 +90,18 @@ exports.sendRequestEmail = asyncHandler(async (req, res, next) => {
 
 	if (
 		profile.contacts.some(
-			(contact) => contact.contact.toString() === req.params.userId.toString()
+			(contact) => contact.contact.toString() === recieverUser.id.toString()
 		)
 	) {
 		return next(new ErrorResponse('user already in contacts', 400));
+	}
+
+	if (
+		profile.blocked.some(
+			(user) => user.user.toString() === recieverUser.id.toString()
+		)
+	) {
+		return next(new ErrorResponse('user is blocked', 400));
 	}
 
 	if (
@@ -231,6 +247,54 @@ exports.removeContact = asyncHandler(async (req, res, next) => {
 
 	await profile.save();
 	await contactProfile.save();
+	res.status(200).json({
+		success: true,
+		data: profile,
+	});
+});
+
+// @desc	block user
+// @route	DELETE /api/v1/contacts/block/:userId
+// @access	Private
+exports.blockUser = asyncHandler(async (req, res, next) => {
+	const profile = await Profile.findOne({ user: req.user.id });
+	const blockuser = await Profile.findOne({ user: req.params.userId });
+
+	if (!blockuser) {
+		return next(
+			new ErrorResponse(
+				`Resource not found with id of ${req.params.userId}`,
+				404
+			)
+		);
+	}
+
+	if (
+		profile.blocked.some(
+			(user) => user.user.toString() === req.params.userId.toString()
+		)
+	) {
+		return next(new ErrorResponse('user already blocked', 400));
+	}
+
+	if (
+		profile.contacts.some(
+			(contact) => contact.contact.toString() === req.params.userId.toString()
+		)
+	) {
+		profile.contacts = profile.contacts.filter(
+			(contact) => contact.contact.toString() != req.params.userId.toString()
+		);
+		blockuser.contacts = blockuser.contacts.filter(
+			(contact) => contact.contact.toString() != req.user.id.toString()
+		);
+
+		await blockuser.save();
+	}
+
+	profile.blocked.push({ user: req.params.userId });
+
+	await profile.save();
 	res.status(200).json({
 		success: true,
 		data: profile,
