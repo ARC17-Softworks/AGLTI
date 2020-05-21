@@ -34,6 +34,7 @@ exports.sendMessage = asyncHandler(async (req, res, next) => {
 			}
 		}
 		await reciever.save();
+		await messageThread.save();
 	} else {
 		messageThread = await MessageThread.create({
 			users: [req.user.id, req.params.userId],
@@ -50,6 +51,100 @@ exports.sendMessage = asyncHandler(async (req, res, next) => {
 		});
 		await profile.save();
 		await reciever.save();
+	}
+
+	res.status(200).json({
+		success: true,
+		data: messageThread,
+	});
+});
+
+// @desc	delete message
+// @route	DELETE /api/v1/messages/thread/:threadId/message/:messageId
+// @access	Private
+exports.deleteMessage = asyncHandler(async (req, res, next) => {
+	const messageThread = await MessageThread.findById(req.params.threadId);
+
+	// thread does not exist
+	if (!messageThread) {
+		return next(
+			new ErrorResponse(
+				`Resource not found with id of ${req.params.threadId}`,
+				404
+			)
+		);
+	}
+
+	// user not part of thread
+	if (
+		!messageThread.users.some(
+			(user) => user.toString() === req.user.id.toString()
+		)
+	) {
+		return next(
+			new ErrorResponse('Not authorised to access this resource', 401)
+		);
+	}
+
+	const message = messageThread.messages.find(
+		(message) => message.id.toString() === req.params.messageId.toString()
+	);
+
+	// message exist in thread
+	if (!message) {
+		return next(
+			new ErrorResponse(
+				`Resource not found with id of ${req.params.messageId}`,
+				404
+			)
+		);
+	}
+
+	// message belongs to user
+	if (message.from.toString() != req.user.id.toString()) {
+		return next(
+			new ErrorResponse('Not authorised to access this resource', 401)
+		);
+	}
+
+	messageThread.messages = messageThread.messages.filter(
+		(message) => message.id.toString() != req.params.messageId.toString()
+	);
+
+	await messageThread.save();
+	res.status(200).json({
+		success: true,
+		data: messageThread,
+	});
+});
+
+// @desc	get message thread
+// @route	GET /api/v1/messages/:threadId
+// @access	Private
+exports.getThread = asyncHandler(async (req, res, next) => {
+	const messageThread = await MessageThread.findById(req.params.threadId)
+		.populate('users', 'name avatar')
+		.populate('messages.from', 'name avatar');
+
+	// thread does not exist
+	if (!messageThread) {
+		return next(
+			new ErrorResponse(
+				`Resource not found with id of ${req.params.threadId}`,
+				404
+			)
+		);
+	}
+
+	// user not part of thread
+	if (
+		!messageThread.users.some(
+			(user) => user.id.toString() === req.user.id.toString()
+		)
+	) {
+		return next(
+			new ErrorResponse('Not authorised to access this resource', 401)
+		);
 	}
 
 	res.status(200).json({
