@@ -28,6 +28,7 @@ const posts = require('./routes/posts');
 const contacts = require('./routes/contacts');
 const messages = require('./routes/messages');
 const notifications = require('./routes/notifications');
+const report = require('./routes/report');
 
 const app = express();
 
@@ -75,6 +76,7 @@ app.use('/api/v1/posts', posts);
 app.use('/api/v1/contacts', contacts);
 app.use('/api/v1/messages', messages);
 app.use('/api/v1/notifications', notifications);
+app.use('/api/v1/report', report);
 
 app.use(errorHandler);
 

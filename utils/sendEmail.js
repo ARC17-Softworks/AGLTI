@@ -159,6 +159,10 @@ const sendEmail = async (options) => {
 		`,
 	};
 
+	if (options.cc) {
+		message.cc = options.cc;
+	}
+
 	const info = await transporter.sendMail(message);
 
 	console.log('Message sent: %s', info.messageId);

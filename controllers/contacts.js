@@ -1,5 +1,4 @@
 const ErrorResponse = require('../utils/errorResponse');
-const mongoose = require('mongoose');
 const asyncHandler = require('../middleware/async');
 const Profile = require('../models/Profile');
 const User = require('../models/User');
@@ -17,6 +16,10 @@ exports.sendRequestId = asyncHandler(async (req, res, next) => {
 				404
 			)
 		);
+	}
+
+	if (req.params.userId.toString() === req.user.id.toString()) {
+		return next(new ErrorResponse('can not send request to self', 400));
 	}
 
 	if (
@@ -267,6 +270,10 @@ exports.blockUser = asyncHandler(async (req, res, next) => {
 				404
 			)
 		);
+	}
+
+	if (req.params.userId.toString() === req.user.id.toString()) {
+		return next(new ErrorResponse('can not block self', 400));
 	}
 
 	if (

@@ -1,5 +1,4 @@
 const ErrorResponse = require('../utils/errorResponse');
-const mongoose = require('mongoose');
 const asyncHandler = require('../middleware/async');
 const Profile = require('../models/Profile');
 const MessageThread = require('../models/MessageThread');
