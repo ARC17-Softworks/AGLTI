@@ -1,6 +1,6 @@
 {
 	"name": "aglti",
-	"version": "1.0.0",
+	"version": "0.0.1",
 	"description": "project management web app",
 	"main": "server.js",
 	"scripts": {
@@ -15,7 +15,7 @@
 		"MERN"
 	],
 	"author": "Bilal Zubairi",
-	"license": "GPL-3.0-or-later",
+	"license": "UNLICENSED",
 	"bugs": {
 		"url": "https://github.com/ARC17-Softworks/AGLTI/issues"
 	},
