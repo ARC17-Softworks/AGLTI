@@ -21,6 +21,26 @@ exports.sendMessage = asyncHandler(async (req, res, next) => {
 		);
 	}
 
+	if (req.params.userId.toString() === req.user.id.toString()) {
+		return next(new ErrorResponse('connot send message to self', 400));
+	}
+
+	if (
+		profile.blocked.some(
+			(user) => user.user.toString() === req.params.userId.toString()
+		)
+	) {
+		return next(new ErrorResponse('user in blocked list', 400));
+	}
+
+	if (
+		reciever.blocked.some(
+			(user) => user.user.toString() === req.user.id.toString()
+		)
+	) {
+		return next(new ErrorResponse('you have ben blocked', 400));
+	}
+
 	const thread = profile.messages.find(
 		(thread) => thread.with.toString() === req.params.userId.toString()
 	);

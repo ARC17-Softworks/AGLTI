@@ -246,7 +246,7 @@ exports.getComment = asyncHandler(async (req, res, next) => {
 // @route	PUT /api/v1/posts/mention/:userId/:postId/:commentId
 // @access	Private
 exports.notifyMention = asyncHandler(async (req, res, next) => {
-	const project = await Project.findById(req.project).select('posts');
+	const project = await Project.findById(req.project).select('members posts');
 	const profile = await Profile.findOne({ user: req.params.userId });
 	if (!profile) {
 		return next(
@@ -256,6 +256,15 @@ exports.notifyMention = asyncHandler(async (req, res, next) => {
 			)
 		);
 	}
+
+	if (
+		!project.members.some(
+			(member) => member.dev.toString() === req.params.userId.toString()
+		)
+	) {
+		return next(new ErrorResponse('user not member of project', 400));
+	}
+
 	const post = project.posts.id(req.params.postId);
 	if (!post) {
 		return next(

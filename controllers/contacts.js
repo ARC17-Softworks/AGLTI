@@ -300,3 +300,39 @@ exports.blockUser = asyncHandler(async (req, res, next) => {
 		data: profile,
 	});
 });
+
+// @desc	unblock user
+// @route	PUT /api/v1/contacts/block/:userId
+// @access	Private
+exports.unblockUser = asyncHandler(async (req, res, next) => {
+	const profile = await Profile.findOne({ user: req.user.id });
+	const blockuser = await Profile.findOne({ user: req.params.userId });
+
+	if (!blockuser) {
+		return next(
+			new ErrorResponse(
+				`Resource not found with id of ${req.params.userId}`,
+				404
+			)
+		);
+	}
+
+	if (
+		!profile.blocked.some(
+			(user) => user.user.toString() === req.params.userId.toString()
+		)
+	) {
+		console.log(profile.blocked);
+		return next(new ErrorResponse('user not in blocked list', 400));
+	}
+
+	profile.blocked = profile.blocked.filter(
+		(block) => block.user.toString() != req.params.userId.toString()
+	);
+
+	await profile.save();
+	res.status(200).json({
+		success: true,
+		data: profile,
+	});
+});
