@@ -25,6 +25,7 @@ exports.pushTask = asyncHandler(async (req, res, next) => {
 
 	if (project.tasks[taskIndex].status === 'TODO') {
 		project.tasks[taskIndex].status = 'DOING';
+		project.tasks[taskIndex].read = true;
 	} else if (project.tasks[taskIndex].status === 'DOING') {
 		project.tasks[taskIndex].status = 'DONE';
 		project.tasks[taskIndex].note = undefined;

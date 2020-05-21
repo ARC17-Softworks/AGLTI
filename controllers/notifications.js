@@ -52,3 +52,79 @@ exports.getNotifications = asyncHandler(async (req, res, next) => {
 		data: notifications,
 	});
 });
+
+// @desc	mark notifications read
+// @route	PUT /api/v1/notifications/clear/:path
+// @access	Private
+exports.markRead = asyncHandler(async (req, res, next) => {
+	const profile = await Profile.findOne({ user: req.user.id });
+	let project;
+	if (profile.activeProject) {
+		project = await Project.findById(profile.activeProject);
+	}
+
+	if (req.params.path === 'messages') {
+		for (const message of profile.messages) {
+			if (message.read === false) {
+				message.read = true;
+			}
+		}
+
+		await profile.save();
+	} else if (req.params.path === 'requests') {
+		for (const request of profile.incomingRequests) {
+			if (request.read === false) {
+				request.read = true;
+			}
+		}
+
+		await profile.save();
+	} else if (req.params.path === 'offers') {
+		if (project) {
+			return next(new ErrorResponse('bad request', 400));
+		}
+
+		for (const offer of profile.offers) {
+			if (offer.read === false) {
+				offer.read = true;
+			}
+		}
+
+		await profile.save();
+	} else if (req.params.path === 'tasks') {
+		if (!project) {
+			return next(new ErrorResponse('bad request', 400));
+		}
+
+		for (const task of project.tasks) {
+			if (
+				task.dev.toString() === req.user.id.toString() &&
+				task.status === 'TODO' &&
+				task.read === false
+			) {
+				task.read = true;
+			}
+		}
+
+		await project.save();
+	} else if (req.params.path === 'mentions') {
+		if (!project) {
+			return next(new ErrorResponse('bad request', 400));
+		}
+
+		for (const mention of profile.mentions) {
+			if (mention.read === false) {
+				mention.read = true;
+			}
+		}
+
+		await profile.save();
+	} else {
+		return next(new ErrorResponse('bad request', 400));
+	}
+
+	res.status(200).json({
+		success: true,
+		data: profile,
+	});
+});
