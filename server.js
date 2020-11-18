@@ -11,6 +11,8 @@ const mongoSanitize = require('express-mongo-sanitize');
 const errorHandler = require('./middleware/error');
 require('./services/cache');
 const connectDB = require('./config/db');
+const { ApolloServer } = require('apollo-server-express');
+const { gql } = require('apollo-server-express');
 
 // load env vars
 dotenv.config({ path: './config/config.env' });
@@ -18,30 +20,10 @@ dotenv.config({ path: './config/config.env' });
 // connect to database
 connectDB();
 
-// route files
-const auth = require('./routes/auth');
-const profiles = require('./routes/profiles');
-const projects = require('./routes/projects');
-const positions = require('./routes/positions');
-const search = require('./routes/search');
-const posts = require('./routes/posts');
-const contacts = require('./routes/contacts');
-const messages = require('./routes/messages');
-const notifications = require('./routes/notifications');
-const report = require('./routes/report');
-
 const app = express();
-
-// body parser
-app.use(express.json());
 
 // cookie parser
 app.use(cookieParser());
-
-// dev logging middleware
-if (process.env.NODE_ENV === 'development') {
-	app.use(morgan('dev'));
-}
 
 // sanitize data
 app.use(mongoSanitize());
@@ -63,21 +45,16 @@ app.use(limiter);
 // prevent http param pollution
 app.use(hpp());
 
-// mount routers
-app.use('/api/v1/auth', auth);
-app.use('/api/v1/profiles', profiles);
-app.use('/api/v1/projects', projects);
-app.use('/api/v1/positions', positions);
-app.use('/api/v1/search', search);
-app.use('/api/v1/posts', posts);
-app.use('/api/v1/contacts', contacts);
-app.use('/api/v1/messages', messages);
-app.use('/api/v1/notifications', notifications);
-app.use('/api/v1/report', report);
-
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
+
+const typeDefs = gql`
+	type Query {
+		sayHi: String!
+	}
+`;
+const apolloServer = new ApolloServer({ typeDefs });
 
 const server = app.listen(
 	PORT,
@@ -85,6 +62,8 @@ const server = app.listen(
 		`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow.bold
 	)
 );
+
+apolloServer.applyMiddleware({ app });
 
 // handle undhandled promise rejections
 process.on('unhandledRejection', (err, promise) => {
