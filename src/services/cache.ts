@@ -16,6 +16,19 @@ declare module 'mongoose' {
 	}
 }
 
+declare module 'redis' {
+	interface RedisClient {
+		hget(hasKey: string, key: string): Promise<string>;
+		hset(
+			hasKey: string,
+			key: string,
+			value: string,
+			arg: string,
+			time: number
+		): boolean;
+	}
+}
+
 // connect to redis
 const redisUrl: string = process.env.REDIS_URL as string;
 const client = redis.createClient(redisUrl);
