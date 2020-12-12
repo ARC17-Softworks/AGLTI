@@ -1,6 +1,6 @@
 {
 	"name": "aglti",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "project management web app",
 	"main": "server.js",
 	"scripts": {
@@ -19,9 +19,11 @@
 	},
 	"homepage": "https://aglti.tech/",
 	"dependencies": {
-		"@types/nodemailer": "^6.4.0",
+		"@typegoose/typegoose": "^7.4.5",
+		"type-graphql": "^1.1.1",
 		"apollo-server-express": "^2.19.0",
 		"bcryptjs": "^2.4.3",
+		"class-validator": "^0.12.2",
 		"colors": "^1.4.0",
 		"cookie-parser": "^1.4.5",
 		"dotenv": "^8.2.0",
@@ -39,8 +41,11 @@
 		"xss-clean": "^0.1.1"
 	},
 	"devDependencies": {
+		"@types/nodemailer": "^6.4.0",
+		"@types/bcryptjs": "^2.4.2",
 		"@types/color": "^3.0.1",
 		"@types/express": "^4.17.9",
+		"@types/jsonwebtoken": "^8.5.0",
 		"@types/mongoose": "^5.10.2",
 		"@types/node": "^14.14.8",
 		"@types/redis": "^2.8.28",
