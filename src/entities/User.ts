@@ -5,6 +5,17 @@ import { ObjectType, Field, ID } from 'type-graphql';
 import { prop, pre, getModelForClass, index } from '@typegoose/typegoose';
 import { Schema } from 'mongoose';
 
+// add default avatar
+@pre<User>('save', async function (next) {
+	if (this.avatar) {
+		next();
+	}
+	const initials = this.name.split(' ');
+	const randomColor = Math.floor(Math.random() * 16777215).toString(16);
+	this.avatar = `https://ui-avatars.com/api/?name=${initials[0][0]}+${
+		initials.length > 1 ? initials[1][0] : ''
+	}&background=${randomColor}&color=fff&font-size=0.6&bold=true`;
+})
 // Encrypt password using bcrypt
 @pre<User>('save', async function (next) {
 	if (!this.isModified('password')) {
@@ -40,6 +51,13 @@ export class User {
 	email!: string;
 
 	@Field()
+	@prop({ required: [true, 'please include your name'], trim: true })
+	name!: string;
+
+	@Field()
+	@prop()
+	avatar?: string;
+
 	@prop({
 		required: [true, 'please add a password'],
 		minlength: 6,

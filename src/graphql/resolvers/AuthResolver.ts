@@ -1,30 +1,16 @@
 import jwt from 'jsonwebtoken';
-import {
-	Arg,
-	Ctx,
-	Mutation,
-	Resolver,
-	Query,
-	ObjectType,
-	Field,
-} from 'type-graphql';
+import { Arg, Ctx, Mutation, Resolver, Query } from 'type-graphql';
 import { UserModel } from '../../entities/User';
-// import { UserResponse } from '../types/UserResponse';
+import { RegisterResponse } from '../types/RegisterResponse';
 import { AuthInput } from '../types/AuthInput';
-import { FieldError } from '../types/FieldError';
 import { MyContext } from '../types/MyContext';
 import { sendEmail } from '../../utils/sendEmail';
-
-@ObjectType()
-export class RegisterResponse {
-	@Field()
-	message?: string;
-	@Field(() => [FieldError], { nullable: true })
-	errors?: FieldError[];
-}
+import { UserResponse } from '../types/UserResponse';
 
 @Resolver()
 export class AuthResolver {
+	// @desc	Start user registration by sending registration link to registration email
+	// @access	Public
 	@Mutation(() => RegisterResponse)
 	async beginRegistration(
 		@Arg('input')
@@ -50,7 +36,7 @@ export class AuthResolver {
 
 		const registrationUrl = `${ctx.req.protocol}://${ctx.req.get(
 			'host'
-		)}/api/v1/auth/register/${registrationToken}`;
+		)}//register&token=${registrationToken}`;
 		try {
 			await sendEmail({
 				email: email,
@@ -69,6 +55,52 @@ export class AuthResolver {
 				errors: [{ path: 'register', message: 'email could not be sent' }],
 			};
 		}
+	}
+
+	// @desc	complete registration by authenticating email
+	// @access	Public
+	@Mutation(() => UserResponse)
+	async completeRegistration(
+		@Arg('input')
+		webtoken: string,
+		@Ctx() ctx: MyContext
+	): Promise<UserResponse> {
+		const decoded = jwt.verify(webtoken, process.env.JWT_SECRET as string);
+		const { name, email, password } = decoded as AuthInput;
+
+		let user = await UserModel.findOne({ email });
+		if (user) {
+			return {
+				errors: [
+					{ path: 'register', message: 'user with this email already exists' },
+				],
+			};
+		}
+
+		user = await UserModel.create({
+			name,
+			email,
+			password,
+		});
+
+		// create token
+		const token = user.getSignedToken();
+
+		const options = {
+			expires: new Date(
+				Date.now() + Number(process.env.JWT_COOKIE_EXPIRE) * 24 * 60 * 60 * 1000
+			),
+			httpOnly: true,
+			secure: false,
+		};
+
+		if (process.env.NODE_ENV === 'production') {
+			options.secure = true;
+		}
+
+		ctx.res.cookie('token', token, options);
+
+		return { user };
 	}
 
 	@Query(() => String)

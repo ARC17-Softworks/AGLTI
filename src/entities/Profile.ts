@@ -1,5 +1,5 @@
 import { ObjectType, Field, ID } from 'type-graphql';
-import { prop, getModelForClass, pre, Ref } from '@typegoose/typegoose';
+import { prop, getModelForClass, Ref } from '@typegoose/typegoose';
 import { User } from './User';
 import { Project } from './Project';
 import { Position } from './Position';
@@ -143,17 +143,6 @@ class Mention {
 	read!: boolean;
 }
 
-// add default avatar
-@pre<Profile>('save', async function (next) {
-	if (this.avatar) {
-		next();
-	}
-	const initials = this.name.split(' ');
-	const randomColor = Math.floor(Math.random() * 16777215).toString(16);
-	this.avatar = `https://ui-avatars.com/api/?name=${initials[0][0]}+${
-		initials.length > 1 ? initials[1][0] : ''
-	}&background=${randomColor}&color=fff&font-size=0.6&bold=true`;
-})
 @ObjectType()
 export class Profile {
 	@Field(() => ID)
@@ -162,14 +151,6 @@ export class Profile {
 	@Field()
 	@prop({ type: () => User, ref: () => User, required: true })
 	user!: Ref<User>;
-
-	@Field()
-	@prop({ required: [true, 'please include your name'], trim: true })
-	name!: string;
-
-	@Field()
-	@prop()
-	avatar?: string;
 
 	@Field()
 	@prop({ trim: true })
