@@ -1,5 +1,12 @@
 import jwt from 'jsonwebtoken';
-import { Arg, Ctx, Mutation, Resolver, Query } from 'type-graphql';
+import {
+	Arg,
+	Ctx,
+	Mutation,
+	Resolver,
+	Query,
+	UseMiddleware,
+} from 'type-graphql';
 import { User, UserModel } from '../../entities/User';
 import { RegisterResponse, UserResponse } from '../types/ResponseTypes';
 import { AuthInput } from '../types/AuthInput';
@@ -7,6 +14,7 @@ import { MyContext } from '../types/MyContext';
 import { sendEmail } from '../../utils/sendEmail';
 import { CookieOptions, Response } from 'express';
 import { DocumentType } from '@typegoose/typegoose';
+import { protect } from '../../middleware/auth';
 
 @Resolver()
 export class AuthResolver {
@@ -118,6 +126,13 @@ export class AuthResolver {
 		return { user };
 	}
 
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect)
+	async logout(@Ctx() ctx: MyContext): Promise<Boolean> {
+		ctx.res.clearCookie('token');
+		return true;
+	}
+
 	@Query(() => String)
 	hello() {
 		return 'Hello World';
@@ -141,4 +156,5 @@ const setTokenCookie = (user: DocumentType<User>, res: Response) => {
 	}
 
 	res.cookie('token', token, options);
+	res.cookie('cat', '111111111111111111111111111111111111', options);
 };
