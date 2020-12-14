@@ -1,11 +1,12 @@
 import jwt from 'jsonwebtoken';
 import { Arg, Ctx, Mutation, Resolver, Query } from 'type-graphql';
-import { UserModel } from '../../entities/User';
-import { RegisterResponse } from '../types/RegisterResponse';
+import { User, UserModel } from '../../entities/User';
+import { RegisterResponse, UserResponse } from '../types/ResponseTypes';
 import { AuthInput } from '../types/AuthInput';
 import { MyContext } from '../types/MyContext';
 import { sendEmail } from '../../utils/sendEmail';
-import { UserResponse } from '../types/UserResponse';
+import { CookieOptions, Response } from 'express';
+import { DocumentType } from '@typegoose/typegoose';
 
 @Resolver()
 export class AuthResolver {
@@ -41,7 +42,7 @@ export class AuthResolver {
 			await sendEmail({
 				email: email,
 				subject: 'Welcome to AGLTI | complete account registration',
-				title: `Welcome to AGLTI, ${name.split(' ')[0]}!`,
+				title: `Welcome to AGLTI, ${name!.split(' ')[0]}!`,
 				body:
 					'to complete your registration please follow this link (link expires in 1 hour).',
 				link: registrationUrl,
@@ -81,24 +82,38 @@ export class AuthResolver {
 			name,
 			email,
 			password,
-		});
+		} as User);
 
-		// create token
-		const token = user.getSignedToken();
+		setTokenCookie(user, ctx.res);
 
-		const options = {
-			expires: new Date(
-				Date.now() + Number(process.env.JWT_COOKIE_EXPIRE) * 24 * 60 * 60 * 1000
-			),
-			httpOnly: true,
-			secure: false,
-		};
+		return { user };
+	}
 
-		if (process.env.NODE_ENV === 'production') {
-			options.secure = true;
+	@Mutation(() => UserResponse)
+	async login(
+		@Arg('input')
+		{ email, password }: AuthInput,
+		@Ctx() ctx: MyContext
+	): Promise<UserResponse> {
+		// check for user
+		const user = await UserModel.findOne({ email }).select('+password');
+
+		if (!user) {
+			return {
+				errors: [{ path: 'login', message: 'invalid credentials' }],
+			};
 		}
 
-		ctx.res.cookie('token', token, options);
+		// check if password matches
+		const isMatch = await user.matchPassword(password);
+
+		if (!isMatch) {
+			return {
+				errors: [{ path: 'login', message: 'invalid credentials' }],
+			};
+		}
+
+		setTokenCookie(user, ctx.res);
 
 		return { user };
 	}
@@ -108,3 +123,22 @@ export class AuthResolver {
 		return 'Hello World';
 	}
 }
+
+// Get token from model & create cookie
+const setTokenCookie = (user: DocumentType<User>, res: Response) => {
+	// create token
+	const token = user.getSignedToken();
+
+	const options: CookieOptions = {
+		expires: new Date(
+			Date.now() + Number(process.env.JWT_COOKIE_EXPIRE) * 24 * 60 * 60 * 1000
+		),
+		httpOnly: true,
+	};
+
+	if (process.env.NODE_ENV === 'production') {
+		options.secure = true;
+	}
+
+	res.cookie('token', token, options);
+};

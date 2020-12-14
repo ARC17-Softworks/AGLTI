@@ -3,8 +3,8 @@ import { MinLength, IsEmail } from 'class-validator';
 
 @InputType()
 export class AuthInput {
-	@Field()
-	name!: string;
+	@Field({ nullable: true })
+	name?: string;
 
 	@Field()
 	@IsEmail()
