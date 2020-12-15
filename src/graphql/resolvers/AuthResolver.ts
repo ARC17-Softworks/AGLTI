@@ -15,6 +15,7 @@ import { CookieOptions, Response } from 'express';
 import { DocumentType } from '@typegoose/typegoose';
 import { protect } from '../../middleware/auth';
 import { ApolloError, UserInputError } from 'apollo-server-express';
+import { UserResponse } from '../types/ResponseTypes';
 
 @Resolver()
 export class AuthResolver {
@@ -62,12 +63,12 @@ export class AuthResolver {
 
 	// @desc	complete registration by authenticating email
 	// @access	Public
-	@Mutation(() => User)
+	@Mutation(() => UserResponse)
 	async completeRegistration(
 		@Arg('input')
 		webtoken: string,
 		@Ctx() ctx: MyContext
-	): Promise<User> {
+	): Promise<UserResponse> {
 		const decoded = jwt.verify(webtoken, process.env.JWT_SECRET as string);
 		const { name, email, password } = decoded as AuthInput;
 
@@ -84,7 +85,7 @@ export class AuthResolver {
 
 		setTokenCookie(user, ctx.res);
 
-		return user;
+		return { user };
 	}
 
 	// @desc	authenticate email before login
@@ -103,12 +104,12 @@ export class AuthResolver {
 
 	// @desc	login to account
 	// @access	Public
-	@Mutation(() => User)
+	@Mutation(() => UserResponse)
 	async login(
 		@Arg('input')
 		{ email, password }: AuthInput,
 		@Ctx() ctx: MyContext
-	): Promise<User> {
+	): Promise<UserResponse> {
 		// check for user
 		const user = await UserModel.findOne({ email }).select('+password');
 
@@ -125,7 +126,7 @@ export class AuthResolver {
 
 		setTokenCookie(user, ctx.res);
 
-		return user;
+		return { user };
 	}
 
 	// @desc	logout of account
@@ -135,6 +136,27 @@ export class AuthResolver {
 	async logout(@Ctx() ctx: MyContext): Promise<Boolean> {
 		ctx.res.clearCookie('token');
 		return true;
+	}
+
+	@Mutation(() => UserResponse)
+	@UseMiddleware(protect)
+	async updatePassword(
+		@Arg('currentPassword') currentPassword: string,
+		@Arg('newPassword') newPassword: string,
+		@Ctx() ctx: MyContext
+	): Promise<UserResponse> {
+		const user = (await UserModel.findById(ctx.req.user!.id).select(
+			'+password'
+		)) as DocumentType<User>;
+
+		// check current password
+		if (!(await user!.matchPassword(currentPassword))) {
+			throw new ApolloError('incorrect password');
+		}
+
+		user!.password = newPassword;
+		await user!.save();
+		return { user };
 	}
 }
 
