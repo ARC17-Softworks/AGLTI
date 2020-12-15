@@ -16,6 +16,7 @@ import { DocumentType } from '@typegoose/typegoose';
 import { protect } from '../../middleware/auth';
 import { ApolloError, UserInputError } from 'apollo-server-express';
 import { UserResponse } from '../types/ResponseTypes';
+import crypto from 'crypto';
 
 @Resolver()
 export class AuthResolver {
@@ -93,7 +94,7 @@ export class AuthResolver {
 	@Query(() => Boolean)
 	async authenticateEmail(@Arg('email') email: string) {
 		if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-			return new UserInputError('invalid email');
+			throw new UserInputError('invalid email');
 		}
 		const user = await UserModel.findOne({ email });
 		if (!user) {
@@ -138,6 +139,8 @@ export class AuthResolver {
 		return true;
 	}
 
+	// @desc	update password
+	// @access	Private
 	@Mutation(() => UserResponse)
 	@UseMiddleware(protect)
 	async updatePassword(
@@ -150,12 +153,91 @@ export class AuthResolver {
 		)) as DocumentType<User>;
 
 		// check current password
-		if (!(await user!.matchPassword(currentPassword))) {
+		if (!(await user.matchPassword(currentPassword))) {
 			throw new ApolloError('incorrect password');
 		}
 
-		user!.password = newPassword;
-		await user!.save();
+		user.password = newPassword;
+		await user.save();
+		return { user };
+	}
+
+	// @desc	forgot password send email
+	// @access	Private
+	@Mutation(() => Boolean)
+	async forgotPassword(
+		@Arg('email') email: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const user = await UserModel.findOne({ email: email });
+
+		if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+			throw new UserInputError('invalid email');
+		}
+
+		if (!user) {
+			throw new ApolloError('no user with this email');
+		}
+
+		// get reset token
+		const resetToken = user.getResetPasswordToken();
+
+		await user!.save({ validateBeforeSave: false });
+
+		// create reset url
+		const resetUrl = `${ctx.req.protocol}://${ctx.req.get(
+			'host'
+		)}/resetpassword/${resetToken}`;
+
+		try {
+			await sendEmail({
+				email: user.email,
+				subject: 'AGLTI | reset password',
+				title: 'Reset you account password',
+				body:
+					'You are recieving this email because you (or someone else) has requested the reset of your AGLTI account password. (link expire in 10 minutes)',
+				link: resetUrl,
+				linkName: 'Reset Password',
+			});
+
+			return true;
+		} catch (err) {
+			console.log(err);
+			user.resetPasswordToken = undefined;
+			user.resetPasswordExpire = undefined;
+
+			await user.save({ validateBeforeSave: false });
+			throw new ApolloError('email could not be sent');
+		}
+	}
+
+	@Mutation(() => UserResponse)
+	@UseMiddleware(protect)
+	async resetPassword(
+		@Arg('resettoken') resettoken: string,
+		@Arg('newPassword') newPassword: string
+	): Promise<UserResponse> {
+		// get hashed token
+		const resetPasswordToken = crypto
+			.createHash('sha256')
+			.update(resettoken)
+			.digest('hex');
+		const user = await UserModel.findOne({
+			resetPasswordToken,
+			resetPasswordExpire: { $gt: new Date(Date.now()) },
+		});
+
+		if (!user) {
+			throw new ApolloError('invalid token');
+		}
+
+		// set new password
+		user.password = newPassword;
+
+		user.resetPasswordToken = undefined;
+		user.resetPasswordExpire = undefined;
+
+		await user.save();
 		return { user };
 	}
 }

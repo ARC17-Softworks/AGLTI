@@ -65,11 +65,11 @@ export class User {
 	})
 	password!: string;
 
-	@Field()
+	@Field({ nullable: true })
 	@prop()
 	resetPasswordToken?: String;
 
-	@Field()
+	@Field({ nullable: true })
 	@prop()
 	resetPasswordExpire?: Date;
 
