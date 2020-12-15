@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { MiddlewareFn } from 'type-graphql';
 import { MyContext } from '../graphql/types/MyContext';
 import { User, UserModel } from '../entities/User';
-import { ApolloError } from 'apollo-server-express';
+import { AuthenticationError } from 'apollo-server-express';
 
 export const protect: MiddlewareFn<MyContext> = async ({ context }, next) => {
 	if (
@@ -11,7 +11,7 @@ export const protect: MiddlewareFn<MyContext> = async ({ context }, next) => {
 			?.split('; ')
 			.filter((item) => item.startsWith('token=')).length
 	) {
-		throw new ApolloError('not authenticated');
+		throw new AuthenticationError('not authenticated');
 	}
 
 	const token = context.req
@@ -32,7 +32,7 @@ export const protect: MiddlewareFn<MyContext> = async ({ context }, next) => {
 		)) as User;
 	} catch (err) {
 		console.log(err);
-		throw new ApolloError('Not authorised to access this resource');
+		throw new AuthenticationError('Not authorised to access this resource');
 	}
 
 	return next();

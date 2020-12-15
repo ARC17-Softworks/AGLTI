@@ -8,31 +8,27 @@ import {
 	UseMiddleware,
 } from 'type-graphql';
 import { User, UserModel } from '../../entities/User';
-import { RegisterResponse, UserResponse } from '../types/ResponseTypes';
 import { AuthInput } from '../types/AuthInput';
 import { MyContext } from '../types/MyContext';
 import { sendEmail } from '../../utils/sendEmail';
 import { CookieOptions, Response } from 'express';
 import { DocumentType } from '@typegoose/typegoose';
 import { protect } from '../../middleware/auth';
+import { ApolloError, UserInputError } from 'apollo-server-express';
 
 @Resolver()
 export class AuthResolver {
 	// @desc	Start user registration by sending registration link to registration email
 	// @access	Public
-	@Mutation(() => RegisterResponse)
+	@Mutation(() => Boolean)
 	async beginRegistration(
 		@Arg('input')
 		{ name, email, password }: AuthInput,
 		@Ctx() ctx: MyContext
-	): Promise<RegisterResponse> {
+	): Promise<Boolean> {
 		const user = await UserModel.findOne({ email });
 		if (user) {
-			return {
-				errors: [
-					{ path: 'register', message: 'user with this email already exists' },
-				],
-			};
+			throw new ApolloError('user with this email already exists');
 		}
 
 		const registrationToken = jwt.sign(
@@ -57,33 +53,27 @@ export class AuthResolver {
 				linkName: 'Complete Registration',
 			});
 
-			return { message: 'email sent' };
+			return true;
 		} catch (err) {
 			console.log(err);
-			return {
-				errors: [{ path: 'register', message: 'email could not be sent' }],
-			};
+			throw new ApolloError('email could not be sent');
 		}
 	}
 
 	// @desc	complete registration by authenticating email
 	// @access	Public
-	@Mutation(() => UserResponse)
+	@Mutation(() => User)
 	async completeRegistration(
 		@Arg('input')
 		webtoken: string,
 		@Ctx() ctx: MyContext
-	): Promise<UserResponse> {
+	): Promise<User> {
 		const decoded = jwt.verify(webtoken, process.env.JWT_SECRET as string);
 		const { name, email, password } = decoded as AuthInput;
 
 		let user = await UserModel.findOne({ email });
 		if (user) {
-			return {
-				errors: [
-					{ path: 'register', message: 'user with this email already exists' },
-				],
-			};
+			throw new ApolloError('user with this email already exists');
 		}
 
 		user = await UserModel.create({
@@ -94,48 +84,57 @@ export class AuthResolver {
 
 		setTokenCookie(user, ctx.res);
 
-		return { user };
+		return user;
 	}
 
-	@Mutation(() => UserResponse)
+	// @desc	authenticate email before login
+	// @access	Public
+	@Query(() => Boolean)
+	async authenticateEmail(@Arg('email') email: string) {
+		if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+			return new UserInputError('invalid email');
+		}
+		const user = await UserModel.findOne({ email });
+		if (!user) {
+			return false;
+		}
+		return true;
+	}
+
+	// @desc	login to account
+	// @access	Public
+	@Mutation(() => User)
 	async login(
 		@Arg('input')
 		{ email, password }: AuthInput,
 		@Ctx() ctx: MyContext
-	): Promise<UserResponse> {
+	): Promise<User> {
 		// check for user
 		const user = await UserModel.findOne({ email }).select('+password');
 
 		if (!user) {
-			return {
-				errors: [{ path: 'login', message: 'invalid credentials' }],
-			};
+			throw new ApolloError('invalid credentials');
 		}
 
 		// check if password matches
 		const isMatch = await user.matchPassword(password);
 
 		if (!isMatch) {
-			return {
-				errors: [{ path: 'login', message: 'invalid credentials' }],
-			};
+			throw new ApolloError('invalid credentials');
 		}
 
 		setTokenCookie(user, ctx.res);
 
-		return { user };
+		return user;
 	}
 
+	// @desc	logout of account
+	// @access	Private
 	@Mutation(() => Boolean)
 	@UseMiddleware(protect)
 	async logout(@Ctx() ctx: MyContext): Promise<Boolean> {
 		ctx.res.clearCookie('token');
 		return true;
-	}
-
-	@Query(() => String)
-	hello() {
-		return 'Hello World';
 	}
 }
 
@@ -156,5 +155,4 @@ const setTokenCookie = (user: DocumentType<User>, res: Response) => {
 	}
 
 	res.cookie('token', token, options);
-	res.cookie('cat', '111111111111111111111111111111111111', options);
 };
