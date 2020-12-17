@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID } from 'type-graphql';
+import { ObjectType, Field, ID, InputType } from 'type-graphql';
 import { prop, getModelForClass, Ref } from '@typegoose/typegoose';
 import { User } from './User';
 import { Project } from './Project';
@@ -17,7 +17,7 @@ class Projects {
 	title!: string;
 
 	@Field(() => [String])
-	@prop()
+	@prop({ type: () => [String] })
 	skills!: string[];
 }
 
@@ -64,6 +64,7 @@ export class Education {
 }
 
 @ObjectType()
+@InputType('LinksInput')
 export class Links {
 	@Field({ nullable: true })
 	@prop()
@@ -187,11 +188,11 @@ export class Profile {
 	@prop({ type: () => User, ref: () => User, required: true })
 	user!: Ref<User>;
 
-	@Field()
+	@Field({ nullable: true })
 	@prop({ trim: true })
 	bio?: string;
 
-	@Field()
+	@Field({ nullable: true })
 	@prop({ trim: true })
 	location?: string;
 

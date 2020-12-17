@@ -4,7 +4,7 @@ import { User } from './User';
 
 @ObjectType()
 class Message {
-	@Field()
+	@Field(() => User)
 	@prop({ type: () => User, ref: () => User })
 	from!: Ref<User>;
 
@@ -22,9 +22,9 @@ export class MessageThread {
 	@Field(() => ID)
 	id!: string;
 
-	@Field()
+	@Field(() => [User])
 	@prop({
-		type: () => User,
+		type: () => [User],
 		ref: () => User,
 		validate: {
 			validator: (val) => val.length == 2,

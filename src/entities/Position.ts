@@ -8,7 +8,7 @@ export class Position {
 	id!: string;
 
 	@Field(() => Project)
-	@prop({ type: () => Project, ref: () => Project, required: true })
+	@prop({ type: () => Project, ref: 'Project', required: true })
 	project!: Ref<Project>;
 
 	@Field()

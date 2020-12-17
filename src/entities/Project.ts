@@ -14,7 +14,7 @@ class Member {
 	title!: string;
 
 	@Field(() => [String])
-	@prop({ required: true })
+	@prop({ type: () => [String], required: true })
 	skills!: string[];
 }
 
