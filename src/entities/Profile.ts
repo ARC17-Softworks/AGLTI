@@ -150,7 +150,7 @@ class Blocked {
 }
 
 @ObjectType()
-class Message {
+class RecivedMessageThread {
 	@Field(() => MessageThread)
 	@prop({ type: () => MessageThread, ref: () => MessageThread, required: true })
 	thread!: Ref<MessageThread>;
@@ -166,12 +166,12 @@ class Message {
 
 @ObjectType()
 class Mention {
-	@Field()
-	@prop()
+	@Field(() => ID)
+	@prop({ type: () => Schema.Types.ObjectId })
 	post?: Schema.Types.ObjectId;
 
-	@Field()
-	@prop()
+	@Field(() => ID)
+	@prop({ type: () => Schema.Types.ObjectId })
 	comment?: Schema.Types.ObjectId;
 
 	@Field()
@@ -244,9 +244,9 @@ export class Profile {
 	@prop({ type: () => [Blocked], _id: false })
 	blocked?: Blocked[];
 
-	@Field(() => [Message], { nullable: true })
-	@prop({ type: () => [Message], _id: false })
-	messages?: Message[];
+	@Field(() => [RecivedMessageThread], { nullable: true })
+	@prop({ type: () => [RecivedMessageThread], _id: false })
+	messages?: RecivedMessageThread[];
 
 	@Field(() => [Mention], { nullable: true })
 	@prop({ type: () => [Mention], _id: false })

@@ -1,10 +1,18 @@
 import { ApolloError } from 'apollo-server-express';
-import { Arg, Ctx, Mutation, Resolver, UseMiddleware } from 'type-graphql';
+import {
+	Arg,
+	Ctx,
+	Mutation,
+	Query,
+	Resolver,
+	UseMiddleware,
+} from 'type-graphql';
 import { ProfileModel } from '../../entities/Profile';
 import { UserModel } from '../../entities/User';
 import { protect } from '../../middleware/auth';
 import { ProfileInput } from '../types/InputTypes';
 import { MyContext } from '../types/MyContext';
+import { ProfileResponse } from '../types/ResponseTypes';
 
 @Resolver()
 export class ProfileResolver {
@@ -58,5 +66,38 @@ export class ProfileResolver {
 		}
 
 		return true;
+	}
+
+	@Query(() => ProfileResponse)
+	@UseMiddleware(protect)
+	async getMe(@Ctx() ctx: MyContext) {
+		const profile = await ProfileModel.findOne(
+			{ user: ctx.req.user!.id },
+			{ projects: { $slice: 5 } }
+		)
+			.populate('user', 'name avatar')
+			.populate('project.proj', 'title')
+			.populate('activeProject', 'title')
+			.populate({
+				path: 'offers.position',
+				populate: { path: 'project', select: 'title' },
+			})
+			.populate({
+				path: 'applied.position',
+				populate: { path: 'project', select: 'title' },
+			})
+			.populate('contacts.contact', 'name avatar')
+			.populate('outgoingRequests.user', 'name avatar')
+			.populate('incomingRequests.user', 'name avatar')
+			.populate('blocked.user', 'name avatar')
+			.populate('messages.with', 'name avatar');
+
+		if (!profile) {
+			throw new ApolloError(
+				`Resource not found with id of ${ctx.req.user!.id}`
+			);
+		}
+
+		return { profile };
 	}
 }
