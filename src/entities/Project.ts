@@ -5,7 +5,7 @@ import { Position } from './Position';
 
 @ObjectType()
 class Member {
-	@Field()
+	@Field(() => User)
 	@prop({ type: () => User, ref: () => User, required: true })
 	dev!: Ref<User>;
 
@@ -13,18 +13,18 @@ class Member {
 	@prop({ required: true })
 	title!: string;
 
-	@Field()
+	@Field(() => [String])
 	@prop({ required: true })
 	skills!: string[];
 }
 
 @ObjectType()
 class Applicant {
-	@Field()
+	@Field(() => User)
 	@prop({ type: () => User, ref: () => User, required: true })
 	dev!: Ref<User>;
 
-	@Field()
+	@Field(() => Position)
 	@prop({ type: () => Position, ref: () => Position, required: true })
 	position!: Ref<Position>;
 
@@ -35,19 +35,19 @@ class Applicant {
 
 @ObjectType()
 class Offered {
-	@Field()
+	@Field(() => User)
 	@prop({ type: () => User, ref: () => User, required: true })
 	dev!: Ref<User>;
 
-	@Field()
+	@Field(() => Position)
 	@prop({ type: () => Position, ref: () => Position, required: true })
 	position!: Ref<Position>;
 }
 
 @ObjectType()
 class Task {
-	@Field()
-	@prop({ type: () => User, ref: () => User, required: true })
+	@Field(() => [User])
+	@prop({ type: () => [User], ref: () => User, required: true })
 	devs!: Ref<User>[];
 
 	@Field()
@@ -62,7 +62,7 @@ class Task {
 	})
 	description!: string;
 
-	@Field()
+	@Field({ nullable: true })
 	@prop({
 		trim: true,
 		minlength: 10,
@@ -77,7 +77,7 @@ class Task {
 	@prop({ default: Date.now })
 	startDate?: Date;
 
-	@Field()
+	@Field({ nullable: true })
 	@prop()
 	dueDate?: Date;
 
@@ -88,7 +88,7 @@ class Task {
 
 @ObjectType()
 class Comment {
-	@Field()
+	@Field(() => User)
 	@prop({ type: () => User, ref: () => User, required: true })
 	user!: Ref<User>;
 
@@ -107,7 +107,7 @@ class Comment {
 
 @ObjectType()
 class Post {
-	@Field()
+	@Field(() => User)
 	@prop({ type: () => User, ref: () => User, required: true })
 	user!: Ref<User>;
 
@@ -123,8 +123,8 @@ class Post {
 	})
 	text!: string;
 
-	@Field()
-	@prop({ type: Comment })
+	@Field(() => [Comment], { nullable: true })
+	@prop({ type: () => [Comment] })
 	comments?: Comment[];
 
 	@Field()
@@ -137,7 +137,7 @@ export class Project {
 	@Field(() => ID)
 	id!: string;
 
-	@Field()
+	@Field(() => User)
 	@prop({ type: () => User, ref: () => User, required: true })
 	owner!: Ref<User>;
 
@@ -158,37 +158,36 @@ export class Project {
 	@prop({ default: false })
 	closed?: boolean;
 
-	@Field()
+	@Field(() => [Position], { nullable: true })
 	@prop({
 		ref: () => Position,
-		type: () => Position,
-		required: true,
+		type: () => [Position],
 		_id: false,
 	})
 	openings?: Ref<Position>[];
 
-	@Field()
-	@prop({ type: Member, _id: false })
+	@Field(() => [Member], { nullable: true })
+	@prop({ type: () => [Member], _id: false })
 	members?: Member[];
 
-	@Field()
-	@prop({ type: Member, _id: false })
+	@Field(() => [Member], { nullable: true })
+	@prop({ type: () => [Member], _id: false })
 	previousMembers?: Member[];
 
-	@Field()
-	@prop({ type: Applicant, _id: false })
+	@Field(() => [Applicant], { nullable: true })
+	@prop({ type: () => [Applicant], _id: false })
 	applicants?: Applicant[];
 
-	@Field()
-	@prop({ type: Offered, _id: false })
+	@Field(() => [Offered], { nullable: true })
+	@prop({ type: () => [Offered], _id: false })
 	offered?: Offered[];
 
-	@Field()
-	@prop({ type: Task })
+	@Field(() => [Task], { nullable: true })
+	@prop({ type: () => [Task] })
 	tasks?: Task[];
 
-	@Field()
-	@prop({ type: Post })
+	@Field(() => [Post], { nullable: true })
+	@prop({ type: () => [Post] })
 	posts?: Post[];
 }
 

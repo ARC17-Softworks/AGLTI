@@ -8,7 +8,7 @@ import { Schema } from 'mongoose';
 
 @ObjectType()
 class Projects {
-	@Field()
+	@Field(() => Project)
 	@prop({ type: () => Project, ref: () => Project })
 	proj!: Ref<User>;
 
@@ -16,13 +16,13 @@ class Projects {
 	@prop()
 	title!: string;
 
-	@Field()
+	@Field(() => [String])
 	@prop()
 	skills!: string[];
 }
 
 @ObjectType()
-class Experience {
+export class Experience {
 	@Field()
 	@prop({ trim: true, required: [true, 'please add your job title'] })
 	title!: string;
@@ -31,7 +31,7 @@ class Experience {
 	@prop({ trim: true, required: [true, 'please add the company name'] })
 	company!: string;
 
-	@Field()
+	@Field({ nullable: true })
 	@prop({ trim: true })
 	location?: string;
 
@@ -39,13 +39,13 @@ class Experience {
 	@prop({ required: [true, 'Please add a start date'] })
 	from!: Date;
 
-	@Field()
-	@prop({})
+	@Field({ nullable: true })
+	@prop()
 	to?: Date;
 }
 
 @ObjectType()
-class Education {
+export class Education {
 	@Field()
 	@prop({ trim: true, required: [true, 'please add a school name'] })
 	school!: string;
@@ -59,13 +59,48 @@ class Education {
 	from!: Date;
 
 	@Field()
-	@prop({})
+	@prop()
 	to?: Date;
 }
 
 @ObjectType()
+export class Links {
+	@Field({ nullable: true })
+	@prop()
+	youtube?: string;
+
+	@Field({ nullable: true })
+	@prop()
+	github?: string;
+
+	@Field({ nullable: true })
+	@prop()
+	hackerRank?: string;
+
+	@Field({ nullable: true })
+	@prop()
+	dribble?: string;
+
+	@Field({ nullable: true })
+	@prop()
+	linkedin?: string;
+
+	@Field({ nullable: true })
+	@prop()
+	behance?: string;
+
+	@Field({ nullable: true })
+	@prop()
+	vimeo?: string;
+
+	@Field({ nullable: true })
+	@prop()
+	website?: string;
+}
+
+@ObjectType()
 class Offers {
-	@Field()
+	@Field(() => Position)
 	@prop({ type: () => Position, ref: () => Position, required: true })
 	position!: Ref<Position>;
 
@@ -76,28 +111,28 @@ class Offers {
 
 @ObjectType()
 class Applied {
-	@Field()
+	@Field(() => Position)
 	@prop({ type: () => Position, ref: () => Position, required: true })
 	position!: Ref<Position>;
 }
 
 @ObjectType()
 class Contact {
-	@Field()
+	@Field(() => User)
 	@prop({ ref: () => User, required: true })
 	contact!: Ref<User>;
 }
 
 @ObjectType()
 class OutgoingRequest {
-	@Field()
+	@Field(() => User)
 	@prop({ type: () => User, ref: () => User, required: true })
 	user!: Ref<User>;
 }
 
 @ObjectType()
 class IncomingRequest {
-	@Field()
+	@Field(() => User)
 	@prop({ type: () => User, ref: () => User, required: true })
 	user!: Ref<User>;
 
@@ -108,18 +143,18 @@ class IncomingRequest {
 
 @ObjectType()
 class Blocked {
-	@Field()
+	@Field(() => User)
 	@prop({ type: () => User, ref: () => User, required: true })
 	user!: Ref<User>;
 }
 
 @ObjectType()
 class Message {
-	@Field()
+	@Field(() => MessageThread)
 	@prop({ type: () => MessageThread, ref: () => MessageThread, required: true })
 	thread!: Ref<MessageThread>;
 
-	@Field()
+	@Field(() => User)
 	@prop({ type: () => User, ref: () => User, required: true })
 	with!: Ref<User>;
 
@@ -148,7 +183,7 @@ export class Profile {
 	@Field(() => ID)
 	id!: string;
 
-	@Field()
+	@Field(() => User)
 	@prop({ type: () => User, ref: () => User, required: true })
 	user!: Ref<User>;
 
@@ -160,69 +195,60 @@ export class Profile {
 	@prop({ trim: true })
 	location?: string;
 
-	@Field()
-	@prop({ required: [true, 'please add your skills'] })
+	@Field(() => [String])
+	@prop({ type: () => [String], required: [true, 'please add your skills'] })
 	skills!: string[];
 
-	@Field()
-	@prop({ type: Projects, _id: false })
+	@Field(() => [Projects], { nullable: true })
+	@prop({ type: () => [Projects], _id: false })
 	projects?: Projects[];
 
-	@Field()
-	@prop({ type: Experience })
+	@Field(() => [Experience], { nullable: true })
+	@prop({ type: () => [Experience] })
 	experience?: Experience[];
 
-	@Field()
-	@prop({ type: Education })
+	@Field(() => [Education], { nullable: true })
+	@prop({ type: () => [Education] })
 	education?: Education[];
 
-	@Field()
-	@prop()
-	links?: {
-		youtube?: string;
-		github?: string;
-		hackerRank?: string;
-		dribble?: string;
-		linkedin?: string;
-		behance?: string;
-		vimeo?: string;
-		website?: string;
-	};
+	@Field(() => Links)
+	@prop({ type: () => Links })
+	links?: Links;
 
-	@Field()
+	@Field(() => Project, { nullable: true })
 	@prop({ type: () => Project, ref: () => Project })
 	activeProject?: Ref<Project>;
 
-	@Field()
-	@prop({ type: Offers, _id: false })
+	@Field(() => [Offers], { nullable: true })
+	@prop({ type: () => [Offers], _id: false })
 	offers?: Offers[];
 
-	@Field()
-	@prop({ type: Applied, _id: false })
+	@Field(() => [Applied], { nullable: true })
+	@prop({ type: () => [Applied], _id: false })
 	applied?: Applied[];
 
-	@Field()
-	@prop({ type: Contact, _id: false })
+	@Field(() => [Contact], { nullable: true })
+	@prop({ type: () => [Contact], _id: false })
 	contacts?: Contact[];
 
-	@Field()
-	@prop({ type: OutgoingRequest, _id: false })
+	@Field(() => [OutgoingRequest], { nullable: true })
+	@prop({ type: () => [OutgoingRequest], _id: false })
 	outgoingRequests?: OutgoingRequest[];
 
-	@Field()
-	@prop({ type: IncomingRequest, _id: false })
+	@Field(() => [IncomingRequest], { nullable: true })
+	@prop({ type: () => [IncomingRequest], _id: false })
 	incomingRequests?: IncomingRequest[];
 
-	@Field()
-	@prop({ type: Blocked, _id: false })
+	@Field(() => [Blocked], { nullable: true })
+	@prop({ type: () => [Blocked], _id: false })
 	blocked?: Blocked[];
 
-	@Field()
-	@prop({ type: Message, _id: false })
+	@Field(() => [Message], { nullable: true })
+	@prop({ type: () => [Message], _id: false })
 	messages?: Message[];
 
-	@Field()
-	@prop({ type: Mention, _id: false })
+	@Field(() => [Mention], { nullable: true })
+	@prop({ type: () => [Mention], _id: false })
 	mentions?: Mention[];
 }
 

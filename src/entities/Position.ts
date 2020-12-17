@@ -7,7 +7,7 @@ export class Position {
 	@Field(() => ID)
 	id!: string;
 
-	@Field()
+	@Field(() => Project)
 	@prop({ type: () => Project, ref: () => Project, required: true })
 	project!: Ref<Project>;
 
@@ -20,8 +20,8 @@ export class Position {
 	})
 	title!: string;
 
-	@Field()
-	@prop({ required: [true, 'skill(s) required'] })
+	@Field(() => [String])
+	@prop({ type: [String], required: [true, 'skill(s) required'] })
 	skills!: string[];
 
 	@Field()

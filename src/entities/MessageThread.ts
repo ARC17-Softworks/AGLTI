@@ -33,8 +33,8 @@ export class MessageThread {
 	})
 	users!: Ref<User>[];
 
-	@Field()
-	@prop({ type: Message })
+	@Field(() => [Message])
+	@prop({ type: () => [Message] })
 	messages?: Message[];
 }
 

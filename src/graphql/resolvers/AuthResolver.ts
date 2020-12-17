@@ -8,7 +8,7 @@ import {
 	UseMiddleware,
 } from 'type-graphql';
 import { User, UserModel } from '../../entities/User';
-import { AuthInput } from '../types/AuthInput';
+import { AuthInput } from '../types/InputTypes';
 import { MyContext } from '../types/MyContext';
 import { sendEmail } from '../../utils/sendEmail';
 import { CookieOptions, Response } from 'express';
