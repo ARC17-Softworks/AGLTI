@@ -52,7 +52,9 @@ export class ProfileResolver {
 					location,
 					links,
 				});
-			} catch (err) {}
+			} catch (err) {
+				throw new ApolloError('could not complete request');
+			}
 		}
 
 		if (name) {
@@ -96,6 +98,26 @@ export class ProfileResolver {
 			throw new ApolloError(
 				`Resource not found with id of ${ctx.req.user!.id}`
 			);
+		}
+
+		return { profile };
+	}
+
+	@Query(() => ProfileResponse)
+	@UseMiddleware(protect)
+	async getProfile(@Arg('userId') userId: string) {
+		const profile = await ProfileModel.findOne(
+			{ user: userId },
+			{ projects: { $slice: 5 } }
+		)
+			.select(
+				'-offers -applied -outgoingRequests -incomingRequests -contacts -blocked -messages -mentions'
+			)
+			.populate('user', 'name avatar')
+			.populate('project.proj', 'title')
+			.populate('activeProject', 'title');
+		if (!profile) {
+			throw new ApolloError(`Resource not found with id of ${userId}`);
 		}
 
 		return { profile };

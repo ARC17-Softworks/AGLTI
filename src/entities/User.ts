@@ -25,9 +25,8 @@ import { Schema } from 'mongoose';
 	this.password = await bcrypt.hash(this.password, salt);
 })
 @index(
-	{ email: 1 },
+	{},
 	{
-		unique: true,
 		partialFilterExpression: { email: { $type: 'string' } },
 	}
 )
@@ -45,7 +44,7 @@ export class User {
 			/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
 			'Please add a valid email',
 		],
-
+		unique: true,
 		lowercase: true,
 	})
 	email!: string;
