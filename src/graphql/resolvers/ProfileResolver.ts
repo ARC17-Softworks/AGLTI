@@ -238,4 +238,22 @@ export class ProfileResolver {
 		await profile.save();
 		return true;
 	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect)
+	async addEducation(
+		@Arg('input')
+		education: Education,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
+		if (!profile) {
+			throw new ApolloError(
+				`Resource not found with id of ${ctx.req.user!.id}`
+			);
+		}
+		profile.education!.unshift(education);
+		await profile.save();
+		return true;
+	}
 }
