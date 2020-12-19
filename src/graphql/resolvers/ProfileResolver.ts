@@ -283,4 +283,29 @@ export class ProfileResolver {
 		await profile.save();
 		return true;
 	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect)
+	async removeEducation(
+		@Arg('eduId')
+		eduId: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
+		if (!profile) {
+			throw new ApolloError(
+				`Resource not found with id of ${ctx.req.user!.id}`
+			);
+		}
+
+		if (!profile.education) {
+			throw new ApolloError(`Resource not found with id of ${eduId}`);
+		}
+		// get index of item to remove
+		const removeIndex = profile.education.map((item) => item.id).indexOf(eduId);
+
+		profile.education.splice(removeIndex, 1);
+		await profile.save();
+		return true;
+	}
 }
