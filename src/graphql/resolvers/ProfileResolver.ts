@@ -169,6 +169,54 @@ export class ProfileResolver {
 		}
 
 		pagination.pages = Math.ceil(total / limit);
+		pagination.total = total;
+		pagination.count = projects.projects!.length;
+
+		return { projects, pagination };
+	}
+
+	@Query(() => ProjectsResponse)
+	@UseMiddleware(protect)
+	async getUserProjects(
+		@Arg('userId') userId: string,
+		@Arg('input')
+		{ page, limit }: PaginationInput
+	) {
+		if (!page) page = 1;
+		if (!limit) limit = 20;
+		const startIndex = (page - 1) * limit;
+		const endIndex = page * limit;
+
+		const projects = await ProfileModel.findOne({ user: userId })
+			.select('projects')
+			.populate('projects.proj', 'title');
+		if (!projects) {
+			throw new ApolloError(`Resource not found with id of ${userId}`);
+		}
+
+		const total = projects.projects!.length;
+
+		projects.projects = projects.projects!.slice(startIndex, endIndex);
+
+		const pagination: Pagiantion = {};
+
+		if (endIndex < total) {
+			pagination.next = {
+				page: page + 1,
+				limit,
+			};
+		}
+
+		if (startIndex > 0) {
+			pagination.prev = {
+				page: page - 1,
+				limit,
+			};
+		}
+
+		pagination.pages = Math.ceil(total / limit);
+		pagination.total = total;
+		pagination.count = projects.projects!.length;
 
 		return { projects, pagination };
 	}

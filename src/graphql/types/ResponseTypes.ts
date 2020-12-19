@@ -33,6 +33,12 @@ export class Pagiantion {
 
 	@Field(() => PagiantionPage)
 	prev?: PagiantionPage;
+
+	@Field()
+	total?: number;
+
+	@Field()
+	count?: number;
 }
 
 @ObjectType()
