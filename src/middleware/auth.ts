@@ -1,8 +1,10 @@
 import jwt from 'jsonwebtoken';
-import { MiddlewareFn } from 'type-graphql';
+import { MiddlewareFn, NextFn } from 'type-graphql';
 import { MyContext } from '../graphql/types/MyContext';
 import { User, UserModel } from '../entities/User';
 import { AuthenticationError } from 'apollo-server-express';
+import { ProjectModel } from '../entities/Project';
+import { ProfileModel } from '../entities/Profile';
 
 export const protect: MiddlewareFn<MyContext> = async ({ context }, next) => {
 	if (
@@ -37,3 +39,55 @@ export const protect: MiddlewareFn<MyContext> = async ({ context }, next) => {
 
 	return next();
 };
+
+// grant access to specific roles
+export function authorize(role: string): MiddlewareFn<MyContext> {
+	return async ({ context }, next: NextFn) => {
+		if (role === 'MEMBER' || role === 'OWNER' || role === 'BOTH') {
+			throw new AuthenticationError('invalid role');
+		}
+
+		const profile = await ProfileModel.findOne({ user: context.req.user!.id });
+		if (!profile || !profile.activeProject) {
+			throw new AuthenticationError('Not authorised to access this resource');
+		}
+
+		const project = await ProjectModel.findById(profile.activeProject);
+
+		if (role === 'MEMBER') {
+			if (
+				!project ||
+				!project.members!.some(
+					(member) => member.dev!.toString() === context.req.user!.id.toString()
+				)
+			) {
+				throw new AuthenticationError('Not authorised to access this resource');
+			}
+
+			context.req.project = project.id;
+			next();
+		} else if (role === 'OWNER') {
+			if (
+				!project ||
+				!(project.owner!.toString() === context.req.user!.id.toString())
+			) {
+				throw new AuthenticationError('Not authorised to access this resource');
+			}
+
+			context.req.project = project.id;
+			next();
+		} else if (role === 'BOTH') {
+			if (
+				!(project!.owner!.toString() === context.req.user!.id.toString()) &&
+				!project!.members!.some(
+					(member) => member.dev!.toString() === context.req.user!.id.toString()
+				)
+			) {
+				throw new AuthenticationError('Not authorised to access this resource');
+			}
+
+			context.req.project = project!.id;
+			next();
+		}
+	};
+}
