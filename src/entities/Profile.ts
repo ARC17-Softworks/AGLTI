@@ -24,6 +24,9 @@ export class Projects {
 @ObjectType()
 @InputType('ExperienceInput')
 export class Experience {
+	@Field(() => ID)
+	id?: string;
+
 	@Field()
 	@prop({ trim: true, required: [true, 'please add your job title'] })
 	title!: string;
@@ -48,6 +51,9 @@ export class Experience {
 @ObjectType()
 @InputType('EducationInput')
 export class Education {
+	@Field(() => ID)
+	id?: string;
+
 	@Field()
 	@prop({ trim: true, required: [true, 'please add a school name'] })
 	school!: string;

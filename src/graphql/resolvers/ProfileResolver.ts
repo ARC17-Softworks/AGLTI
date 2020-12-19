@@ -256,4 +256,31 @@ export class ProfileResolver {
 		await profile.save();
 		return true;
 	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect)
+	async removeExperience(
+		@Arg('expId')
+		expId: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
+		if (!profile) {
+			throw new ApolloError(
+				`Resource not found with id of ${ctx.req.user!.id}`
+			);
+		}
+
+		if (!profile.experience) {
+			throw new ApolloError(`Resource not found with id of ${expId}`);
+		}
+		// get index of item to remove
+		const removeIndex = profile.experience
+			.map((item) => item.id)
+			.indexOf(expId);
+
+		profile.experience.splice(removeIndex, 1);
+		await profile.save();
+		return true;
+	}
 }
