@@ -17,6 +17,7 @@ import { protect } from '../../middleware/auth';
 import { ApolloError, UserInputError } from 'apollo-server-express';
 import { UserResponse } from '../types/ResponseTypes';
 import crypto from 'crypto';
+import { ProfileModel } from '../../entities/Profile';
 
 @Resolver()
 export class AuthResolver {
@@ -239,6 +240,36 @@ export class AuthResolver {
 
 		await user.save();
 		return { user };
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect)
+	async deleteAccount(@Ctx() ctx: MyContext): Promise<Boolean> {
+		const profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
+		if (!profile) {
+			throw new ApolloError('Resource not found');
+		}
+
+		if (profile.activeProject) {
+			throw new ApolloError(
+				'can not delete account while user in project, please leave project and try again'
+			);
+		}
+
+		profile.remove();
+
+		await UserModel.findByIdAndUpdate(ctx.req.user!.id, {
+			name: '[deleted]',
+			$unset: { email: true, password: true },
+		});
+
+		// delete token
+		ctx.res.cookie('token', 'none', {
+			expires: new Date(Date.now() + 10 * 1000),
+			httpOnly: true,
+		});
+
+		return true;
 	}
 }
 

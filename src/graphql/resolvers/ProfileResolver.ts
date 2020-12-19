@@ -230,9 +230,7 @@ export class ProfileResolver {
 	): Promise<Boolean> {
 		const profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
 		if (!profile) {
-			throw new ApolloError(
-				`Resource not found with id of ${ctx.req.user!.id}`
-			);
+			throw new ApolloError('Profile not found');
 		}
 		profile.experience!.unshift(experience);
 		await profile.save();
@@ -248,9 +246,7 @@ export class ProfileResolver {
 	): Promise<Boolean> {
 		const profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
 		if (!profile) {
-			throw new ApolloError(
-				`Resource not found with id of ${ctx.req.user!.id}`
-			);
+			throw new ApolloError('Profile not found');
 		}
 		profile.education!.unshift(education);
 		await profile.save();
@@ -266,9 +262,7 @@ export class ProfileResolver {
 	): Promise<Boolean> {
 		const profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
 		if (!profile) {
-			throw new ApolloError(
-				`Resource not found with id of ${ctx.req.user!.id}`
-			);
+			throw new ApolloError('Profile not found');
 		}
 
 		if (!profile.experience) {
@@ -293,9 +287,7 @@ export class ProfileResolver {
 	): Promise<Boolean> {
 		const profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
 		if (!profile) {
-			throw new ApolloError(
-				`Resource not found with id of ${ctx.req.user!.id}`
-			);
+			throw new ApolloError('Profile not found');
 		}
 
 		if (!profile.education) {
