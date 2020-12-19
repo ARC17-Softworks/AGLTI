@@ -1,3 +1,4 @@
 node_modules/
 config/config.env
 dist/
+_data/
