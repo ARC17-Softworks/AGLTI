@@ -7,7 +7,7 @@ import {
 	Resolver,
 	UseMiddleware,
 } from 'type-graphql';
-import { ProfileModel } from '../../entities/Profile';
+import { Education, Experience, ProfileModel } from '../../entities/Profile';
 import { UserModel } from '../../entities/User';
 import { protect } from '../../middleware/auth';
 import { PaginationInput, ProfileInput } from '../types/InputTypes';
@@ -219,5 +219,23 @@ export class ProfileResolver {
 		pagination.count = projects.projects!.length;
 
 		return { projects, pagination };
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect)
+	async addExperience(
+		@Arg('input')
+		experience: Experience,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
+		if (!profile) {
+			throw new ApolloError(
+				`Resource not found with id of ${ctx.req.user!.id}`
+			);
+		}
+		profile.experience!.unshift(experience);
+		await profile.save();
+		return true;
 	}
 }
