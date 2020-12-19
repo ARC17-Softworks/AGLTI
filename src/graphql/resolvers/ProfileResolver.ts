@@ -10,9 +10,13 @@ import {
 import { ProfileModel } from '../../entities/Profile';
 import { UserModel } from '../../entities/User';
 import { protect } from '../../middleware/auth';
-import { ProfileInput } from '../types/InputTypes';
+import { PaginationInput, ProfileInput } from '../types/InputTypes';
 import { MyContext } from '../types/MyContext';
-import { ProfileResponse } from '../types/ResponseTypes';
+import {
+	Pagiantion,
+	ProfileResponse,
+	ProjectsResponse,
+} from '../types/ResponseTypes';
 
 @Resolver()
 export class ProfileResolver {
@@ -121,5 +125,51 @@ export class ProfileResolver {
 		}
 
 		return { profile };
+	}
+
+	@Query(() => ProjectsResponse)
+	@UseMiddleware(protect)
+	async getMyProjects(
+		@Arg('input')
+		{ page, limit }: PaginationInput,
+		@Ctx() ctx: MyContext
+	) {
+		if (!page) page = 1;
+		if (!limit) limit = 20;
+		const startIndex = (page - 1) * limit;
+		const endIndex = page * limit;
+
+		const projects = await ProfileModel.findOne({ user: ctx.req.user!.id })
+			.select('projects')
+			.populate('projects.proj', 'title');
+		if (!projects) {
+			throw new ApolloError(
+				`Resource not found with id of ${ctx.req.user!.id}`
+			);
+		}
+
+		const total = projects.projects!.length;
+
+		projects.projects = projects.projects!.slice(startIndex, endIndex);
+
+		const pagination: Pagiantion = {};
+
+		if (endIndex < total) {
+			pagination.next = {
+				page: page + 1,
+				limit,
+			};
+		}
+
+		if (startIndex > 0) {
+			pagination.prev = {
+				page: page - 1,
+				limit,
+			};
+		}
+
+		pagination.pages = Math.ceil(total / limit);
+
+		return { projects, pagination };
 	}
 }

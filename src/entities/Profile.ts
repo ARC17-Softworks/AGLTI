@@ -7,7 +7,7 @@ import { MessageThread } from './MessageThread';
 import { Schema } from 'mongoose';
 
 @ObjectType()
-class Projects {
+export class Projects {
 	@Field(() => Project)
 	@prop({ type: () => Project, ref: () => Project })
 	proj!: Ref<User>;

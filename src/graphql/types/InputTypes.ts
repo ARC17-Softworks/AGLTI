@@ -33,3 +33,12 @@ export class ProfileInput {
 	@Field(() => Links, { nullable: true })
 	links?: Links;
 }
+
+@InputType()
+export class PaginationInput {
+	@Field({ nullable: true })
+	page?: number;
+
+	@Field({ nullable: true })
+	limit?: number;
+}
