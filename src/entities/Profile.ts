@@ -10,7 +10,7 @@ import { Schema } from 'mongoose';
 export class Projects {
 	@Field(() => Project)
 	@prop({ type: () => Project, ref: () => Project })
-	proj!: Ref<User>;
+	proj!: Ref<Project>;
 
 	@Field()
 	@prop()
@@ -18,7 +18,7 @@ export class Projects {
 
 	@Field(() => [String])
 	@prop({ type: () => [String] })
-	skills!: string[];
+	skills?: string[];
 }
 
 @ObjectType()
