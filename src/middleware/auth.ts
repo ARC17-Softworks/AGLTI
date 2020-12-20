@@ -43,7 +43,7 @@ export const protect: MiddlewareFn<MyContext> = async ({ context }, next) => {
 // grant access to specific roles
 export function authorize(role: string): MiddlewareFn<MyContext> {
 	return async ({ context }, next: NextFn) => {
-		if (role === 'MEMBER' || role === 'OWNER' || role === 'BOTH') {
+		if (role !== 'MEMBER' && role !== 'OWNER' && role !== 'BOTH') {
 			throw new AuthenticationError('invalid role');
 		}
 
@@ -65,7 +65,7 @@ export function authorize(role: string): MiddlewareFn<MyContext> {
 			}
 
 			context.req.project = project.id;
-			next();
+			return next();
 		} else if (role === 'OWNER') {
 			if (
 				!project ||
@@ -75,7 +75,7 @@ export function authorize(role: string): MiddlewareFn<MyContext> {
 			}
 
 			context.req.project = project.id;
-			next();
+			return next();
 		} else if (role === 'BOTH') {
 			if (
 				!(project!.owner!.toString() === context.req.user!.id.toString()) &&
@@ -87,7 +87,7 @@ export function authorize(role: string): MiddlewareFn<MyContext> {
 			}
 
 			context.req.project = project!.id;
-			next();
+			return next();
 		}
 	};
 }

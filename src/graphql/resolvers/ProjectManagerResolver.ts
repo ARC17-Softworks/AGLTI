@@ -4,7 +4,8 @@ import { Arg, Ctx, Mutation, Resolver, UseMiddleware } from 'type-graphql';
 import { PostionModel } from '../../entities/Position';
 import { ProfileModel } from '../../entities/Profile';
 import { ProjectModel } from '../../entities/Project';
-import { protect } from '../../middleware/auth';
+import { authorize, protect } from '../../middleware/auth';
+import { PositionInput } from '../types/InputTypes';
 import { MyContext } from '../types/MyContext';
 
 @Resolver()
@@ -65,6 +66,37 @@ export class ProjectManagerResolver {
 			profile!.offers = [];
 			profile!.applied = [];
 			await profile!.save();
+		} catch (err) {
+			console.log(err.message);
+			throw new ApolloError(`project creation failed: ${err.message}`);
+		}
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect)
+	@UseMiddleware(authorize('OWNER'))
+	async addPosition(
+		@Arg('input') { title, description, skills }: PositionInput,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		try {
+			const project = await ProjectModel.findById(ctx.req.project);
+
+			if (project!.openings!.length + project!.members!.length > 9) {
+				throw new ApolloError(
+					'developer limit reached cannot create any more positions'
+				);
+			}
+			const position = await PostionModel.create({
+				project: project!.id,
+				skills,
+				title,
+				description,
+			});
+
+			project!.openings!.push({ position: position.id });
+			await project!.save();
 		} catch (err) {
 			console.log(err.message);
 			throw new ApolloError(`project creation failed: ${err.message}`);

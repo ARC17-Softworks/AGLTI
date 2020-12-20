@@ -42,3 +42,15 @@ export class PaginationInput {
 	@Field({ nullable: true })
 	limit?: number;
 }
+
+@InputType()
+export class PositionInput {
+	@Field()
+	title!: string;
+
+	@Field(() => [String])
+	skills!: string[];
+
+	@Field()
+	description!: string;
+}

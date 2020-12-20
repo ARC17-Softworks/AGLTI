@@ -4,6 +4,17 @@ import { User } from './User';
 import { Position } from './Position';
 
 @ObjectType()
+class Opening {
+	@Field(() => Position)
+	@prop({
+		ref: () => Position,
+		type: () => Position,
+		required: true,
+	})
+	position!: Ref<Position>;
+}
+
+@ObjectType()
 class Member {
 	@Field(() => User)
 	@prop({ type: () => User, ref: () => User, required: true })
@@ -70,7 +81,7 @@ class Task {
 	note?: string;
 
 	@Field()
-	@prop({ default: 'TODO' })
+	@prop({ enum: ['TODO', 'DOING', 'DONE', 'COMPLETE'], default: 'TODO' })
 	status?: string;
 
 	@Field()
@@ -158,13 +169,9 @@ export class Project {
 	@prop({ default: false })
 	closed?: boolean;
 
-	@Field(() => [Position], { nullable: true })
-	@prop({
-		ref: () => Position,
-		type: () => [Position],
-		_id: false,
-	})
-	openings?: Ref<Position>[];
+	@Field(() => [Opening], { nullable: true })
+	@prop({ type: () => [Opening], _id: false })
+	openings?: Opening[];
 
 	@Field(() => [Member], { nullable: true })
 	@prop({ type: () => [Member], _id: false })
