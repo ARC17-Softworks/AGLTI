@@ -75,8 +75,7 @@ export class ProjectManagerResolver {
 	}
 
 	@Mutation(() => Boolean)
-	@UseMiddleware(protect)
-	@UseMiddleware(authorize('OWNER'))
+	@UseMiddleware(protect, authorize('OWNER'))
 	async addPosition(
 		@Arg('input') { title, description, skills }: PositionInput,
 		@Ctx() ctx: MyContext
@@ -106,8 +105,7 @@ export class ProjectManagerResolver {
 	}
 
 	@Mutation(() => Boolean)
-	@UseMiddleware(protect)
-	@UseMiddleware(authorize('OWNER'))
+	@UseMiddleware(protect, authorize('OWNER'))
 	async removePosition(
 		@Arg('positionId') positionId: string,
 		@Ctx() ctx: MyContext

@@ -1,5 +1,6 @@
 import { ObjectType, Field } from 'type-graphql';
 import { Profile, Projects } from '../../entities/Profile';
+import { Project } from '../../entities/Project';
 import { User } from '../../entities/User';
 
 @ObjectType()
@@ -48,4 +49,10 @@ export class ProjectsResponse {
 
 	@Field(() => Pagiantion, { nullable: true })
 	pagination?: Pagiantion;
+}
+
+@ObjectType()
+export class ProjectResponse {
+	@Field(() => Project)
+	project!: Project;
 }

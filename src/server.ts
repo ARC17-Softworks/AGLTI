@@ -11,6 +11,7 @@ import './services/cache';
 import { AuthResolver } from './graphql/resolvers/AuthResolver';
 import { ProfileResolver } from './graphql/resolvers/ProfileResolver';
 import { ProjectManagerResolver } from './graphql/resolvers/ProjectManagerResolver';
+import { ProjectResolver } from './graphql/resolvers/ProjectResolver';
 
 const env = dotenv.config({ path: './config/config.env' });
 if (env.error) {
@@ -26,7 +27,12 @@ const main = async () => {
 
 	const server = new ApolloServer({
 		schema: await buildSchema({
-			resolvers: [AuthResolver, ProfileResolver, ProjectManagerResolver],
+			resolvers: [
+				AuthResolver,
+				ProfileResolver,
+				ProjectManagerResolver,
+				ProjectResolver,
+			],
 			validate: true,
 		}),
 		context: ({ req, res }) => ({ req, res }),
