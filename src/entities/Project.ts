@@ -45,7 +45,7 @@ class Applicant {
 }
 
 @ObjectType()
-class Offered {
+export class Offered {
 	@Field(() => User)
 	@prop({ type: () => User, ref: () => User, required: true })
 	dev!: Ref<User>;
@@ -57,6 +57,9 @@ class Offered {
 
 @ObjectType()
 class Task {
+	@Field(() => ID)
+	id!: string;
+
 	@Field(() => [User])
 	@prop({ type: () => [User], ref: () => User, required: true })
 	devs!: Ref<User>[];
@@ -99,6 +102,9 @@ class Task {
 
 @ObjectType()
 class Comment {
+	@Field(() => ID)
+	id!: string;
+
 	@Field(() => User)
 	@prop({ type: () => User, ref: () => User, required: true })
 	user!: Ref<User>;
@@ -118,6 +124,9 @@ class Comment {
 
 @ObjectType()
 class Post {
+	@Field(() => ID)
+	id!: string;
+
 	@Field(() => User)
 	@prop({ type: () => User, ref: () => User, required: true })
 	user!: Ref<User>;

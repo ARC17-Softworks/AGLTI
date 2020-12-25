@@ -108,12 +108,12 @@ export class Links {
 }
 
 @ObjectType()
-class Offers {
+export class Offers {
 	@Field(() => Position)
 	@prop({ type: () => Position, ref: () => Position, required: true })
 	position!: Ref<Position>;
 
-	@Field()
+	@Field({ nullable: true })
 	@prop({ default: false })
 	read!: boolean;
 }
