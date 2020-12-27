@@ -79,4 +79,52 @@ export class JobHuntingResolver {
 		await project!.save();
 		return true;
 	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect)
+	async cancelApplication(
+		@Arg('positionId') positionId: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
+		if (
+			!profile!.applied!.some(
+				(application) =>
+					application.position!.toString() === positionId.toString()
+			)
+		) {
+			throw new ApolloError('application not found');
+		}
+
+		const position = await PostionModel.findById(positionId);
+
+		// check if position exists
+		if (!position) {
+			throw new ApolloError(`Resource not found with id of ${positionId}`);
+		}
+
+		const project = await ProjectModel.findById(position.project);
+
+		// check if position belongs to project
+		if (
+			!project!.openings!.some(
+				(opening) => opening.position!.toString() === position.id.toString()
+			)
+		) {
+			throw new ApolloError('position not part of project');
+		}
+
+		profile!.applied = profile!.applied!.filter(
+			(application) => application.position!.toString() != positionId.toString()
+		);
+		project!.applicants = project!.applicants!.filter(
+			(applicant) =>
+				applicant.position!.toString() != positionId.toString() ||
+				applicant.dev!.toString() != ctx.req.user!.id.toString()
+		);
+
+		await profile!.save();
+		await project!.save();
+		return true;
+	}
 }
