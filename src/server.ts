@@ -12,6 +12,7 @@ import { AuthResolver } from './graphql/resolvers/AuthResolver';
 import { ProfileResolver } from './graphql/resolvers/ProfileResolver';
 import { ProjectManagerResolver } from './graphql/resolvers/ProjectManagerResolver';
 import { ProjectResolver } from './graphql/resolvers/ProjectResolver';
+import { HiringResolver } from './graphql/resolvers/HiringResolver';
 
 const env = dotenv.config({ path: './config/config.env' });
 if (env.error) {
@@ -32,6 +33,7 @@ const main = async () => {
 				ProfileResolver,
 				ProjectManagerResolver,
 				ProjectResolver,
+				HiringResolver,
 			],
 			validate: true,
 		}),

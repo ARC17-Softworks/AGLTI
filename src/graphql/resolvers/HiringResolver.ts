@@ -78,4 +78,52 @@ export class HiringResolver {
 		await project!.save();
 		return true;
 	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
+	async cancelOffer(
+		@Arg('positionId') positionId: string,
+		@Arg('userId') userId: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+		const profile = await ProfileModel.findOne({ user: userId });
+		const position = await PostionModel.findById(positionId);
+		if (
+			!project!.offered!.some(
+				(offer) =>
+					offer.position!.toString() === positionId.toString() &&
+					offer.dev!.toString() === userId.toString()
+			)
+		) {
+			throw new ApolloError('offer not found');
+		}
+
+		// check if position exists
+		if (!position) {
+			throw new ApolloError(`Resource not found with id of ${positionId}`);
+		}
+
+		// check if position belongs to project
+		if (
+			!project!.openings!.some(
+				(opening) => opening.position!.toString() === position.id.toString()
+			)
+		) {
+			throw new ApolloError('position not part of project');
+		}
+
+		profile!.offers = profile!.offers!.filter(
+			(offer) => offer.position!.toString() != positionId.toString()
+		);
+		project!.offered = project!.offered!.filter(
+			(offer) =>
+				offer.position!.toString() != positionId.toString() ||
+				offer.dev!.toString() != userId.toString()
+		);
+
+		await profile!.save();
+		await project!.save();
+		return true;
+	}
 }

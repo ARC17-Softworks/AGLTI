@@ -81,7 +81,7 @@ export class ProfileResolver {
 			{ user: ctx.req.user!.id },
 			{ projects: { $slice: 5 } }
 		)
-			.populate('user', 'name avatar')
+			.populate('user', 'name avatar id')
 			.populate('project.proj', 'title')
 			.populate('activeProject', 'title')
 			.populate({
@@ -117,7 +117,7 @@ export class ProfileResolver {
 			.select(
 				'-offers -applied -outgoingRequests -incomingRequests -contacts -blocked -messages -mentions'
 			)
-			.populate('user', 'name avatar')
+			.populate('user', 'name avatar id')
 			.populate('project.proj', 'title')
 			.populate('activeProject', 'title');
 		if (!profile) {
