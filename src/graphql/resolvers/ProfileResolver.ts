@@ -82,7 +82,7 @@ export class ProfileResolver {
 			{ projects: { $slice: 5 } }
 		)
 			.populate('user', 'name avatar id')
-			.populate('project.proj', 'title')
+			.populate('projects.proj', 'title')
 			.populate('activeProject', 'title')
 			.populate({
 				path: 'offers.position',
@@ -118,7 +118,7 @@ export class ProfileResolver {
 				'-offers -applied -outgoingRequests -incomingRequests -contacts -blocked -messages -mentions'
 			)
 			.populate('user', 'name avatar id')
-			.populate('project.proj', 'title')
+			.populate('projects.proj', 'title')
 			.populate('activeProject', 'title');
 		if (!profile) {
 			throw new ApolloError(`Resource not found with id of ${userId}`);
