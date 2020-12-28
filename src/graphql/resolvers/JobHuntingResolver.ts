@@ -304,4 +304,65 @@ export class JobHuntingResolver {
 			session.endSession();
 		}
 	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect)
+	async rejectOffer(
+		@Arg('positionId') positionId: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const position = await PostionModel.findById(positionId);
+		const profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
+		const project = await ProjectModel.findById(position!.project);
+
+		// check if position exists
+		if (!position) {
+			throw new ApolloError(`Resource not found with id of ${positionId}`);
+		}
+
+		// check if position belongs to project
+		if (
+			!project!.openings!.some(
+				(opening) => opening.position!.toString() === position.id.toString()
+			)
+		) {
+			throw new ApolloError('position not part of project');
+		}
+
+		// check if project manager deleted offer
+		const application = profile!.offers!.find(
+			(application) =>
+				application.position!.toString() === positionId.toString()
+		);
+
+		if (!application) {
+			throw new ApolloError('offer missing');
+		}
+
+		const applicant = project!.offered!.find(
+			(application) =>
+				application.dev!.toString() === ctx.req.user!.id.toString() &&
+				application.position!.toString() === position.id.toString()
+		);
+
+		if (!applicant) {
+			throw new ApolloError('offer missing');
+		}
+
+		project!.offered = project!.offered!.filter(
+			(application) =>
+				!(
+					application.dev!.toString() === ctx.req.user!.id.toString() &&
+					application.position!.toString() === positionId.toString()
+				)
+		);
+
+		profile!.offers = profile!.offers!.filter(
+			(application) => application.position!.toString() != positionId.toString()
+		);
+
+		await profile!.save();
+		await project!.save();
+		return true;
+	}
 }
