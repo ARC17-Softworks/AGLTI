@@ -262,4 +262,30 @@ export class ProjectManagerResolver {
 		await project!.save();
 		return true;
 	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
+	async closeTask(
+		@Arg('taskId') taskId: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+		const task = ((((project!
+			.tasks as Task[]) as unknown) as Types.DocumentArray<
+			DocumentType<Project>
+		>).id(taskId) as unknown) as Task;
+
+		if (!task) {
+			throw new ApolloError('task not found');
+		}
+		if (task.status != 'DONE') {
+			throw new ApolloError('task not done can not close');
+		}
+
+		const taskIndex = project!.tasks!.findIndex((t) => t === task);
+
+		project!.tasks![taskIndex].status = 'COMPLETE';
+		await project!.save();
+		return true;
+	}
 }
