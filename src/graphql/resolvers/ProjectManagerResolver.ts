@@ -345,4 +345,129 @@ export class ProjectManagerResolver {
 		await project!.save();
 		return true;
 	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
+	async closeProject(@Ctx() ctx: MyContext): Promise<Boolean> {
+		const session = await mongoose.startSession();
+		session.startTransaction();
+		try {
+			const project = await ProjectModel.findById(ctx.req.project).session(
+				session
+			);
+
+			// position handling
+			// go to all applicants profiles remove position from applied list
+			// go to all offered profiles remove position from offers list
+			// delete each position
+			// clear openings array
+			//
+			for (const openpos of project!.openings!) {
+				const position = await PostionModel.findById(openpos.position).session(
+					session
+				);
+
+				// (1)for each applicant of same position find profile and delete applied ref
+				for (const app of project!.applicants!) {
+					if (app.position!.toString() === position!.id.toString()) {
+						const rejpro = await ProfileModel.findOne({
+							user: app.dev,
+						}).session(session);
+						rejpro!.applied!.splice(
+							rejpro!.applied!.findIndex(
+								(a) => a.position!.toString() === position!.id.toString()
+							),
+							1
+						);
+						await rejpro!.save();
+					}
+				}
+
+				// (2)for each offer with same position find profile and delete offer
+				for (const offer of project!.offered!) {
+					if (offer.position!.toString() === position!.id.toString()) {
+						const rejpro = await ProfileModel.findOne({
+							user: offer.dev,
+						}).session(session);
+						rejpro!.offers!.splice(
+							rejpro!.offers!.findIndex(
+								(o) => o.position!.toString() === position!.id.toString()
+							),
+							1
+						);
+						await rejpro!.save();
+					}
+				}
+
+				// delete position
+				await PostionModel.findByIdAndDelete(position!.id).session(session);
+			}
+
+			project!.openings = [];
+
+			// members handling
+			// go to each member profile set activeProject as undefined
+			// if member dont have any completed task remove them from member list
+			//
+			for (const mem of project!.members!) {
+				// profile of developer
+				const memprofile = await ProfileModel.findOne({
+					user: mem.dev,
+				}).session(session);
+
+				// if developer did not contribute to project
+				if (
+					!project!.tasks!.some(
+						(task) =>
+							task.dev!.toString() === mem.dev!.toString() &&
+							task.status === 'COMPLETE'
+					)
+				) {
+					// remove project from profile
+					memprofile!.projects!.shift();
+				} else {
+					// add to past members
+					project!.previousMembers!.push(mem);
+				}
+
+				// unset active project
+				memprofile!.activeProject = undefined;
+				// clear project forum mentions
+				memprofile!.mentions = [];
+
+				await memprofile!.save();
+			}
+
+			project!.members = [];
+
+			// delete everything else
+			project!.tasks = [];
+			project!.applicants = [];
+			project!.offered = [];
+			project!.posts = [];
+
+			// go to owner profile
+			// set active project as undefined
+			const ownerprofile = await ProfileModel.findOne({
+				user: project!.owner,
+			}).session(session);
+			ownerprofile!.activeProject = undefined;
+			await ownerprofile!.save();
+
+			// set project as closed
+			project!.closed = true;
+			await project!.save();
+
+			// throw new Error('transaction check');
+			await session.commitTransaction();
+			return true;
+		} catch (err) {
+			await session.abortTransaction();
+			console.error(err.message);
+			console.log(err.stack.red);
+			throw new ApolloError(`Server Error ${err.message}`);
+		} finally {
+			session.endSession();
+		}
+	}
 }
