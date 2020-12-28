@@ -288,4 +288,61 @@ export class ProjectManagerResolver {
 		await project!.save();
 		return true;
 	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
+	async removeDeveloper(
+		@Arg('userId') userId: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+
+		const developer = project!.members!.find(
+			(member) => member.dev!.toString() === userId.toString()
+		);
+
+		if (!developer) {
+			throw new ApolloError('user not part of project');
+		}
+
+		// profile of developer
+		const profile = await ProfileModel.findOne({ user: userId });
+
+		// if developer did not contribute to project
+		if (
+			!project!.tasks!.some(
+				(task) =>
+					task.dev!.toString() === userId.toString() &&
+					task.status === 'COMPLETE'
+			)
+		) {
+			// remove project from profile
+			profile!.projects!.shift();
+		} else {
+			// add to past members
+			project!.previousMembers!.push(developer);
+		}
+
+		// remove from members
+		project!.members = project!.members!.filter(
+			(member) => member != developer
+		);
+		// unset active project
+		profile!.activeProject = undefined;
+		// clear project forum mentions
+		profile!.mentions = [];
+
+		// remove tasks of dev
+		project!.tasks = project!.tasks!.filter(
+			(task) =>
+				!(
+					task.dev!.toString() === userId.toString() &&
+					task.status != 'COMPLETE'
+				)
+		);
+
+		await profile!.save();
+		await project!.save();
+		return true;
+	}
 }
