@@ -48,6 +48,7 @@ export function authorize(role: string): MiddlewareFn<MyContext> {
 		}
 
 		const profile = await ProfileModel.findOne({ user: context.req.user!.id });
+		// console.log(profile);
 		if (!profile || !profile.activeProject) {
 			throw new AuthenticationError('Not authorised to access this resource');
 		}

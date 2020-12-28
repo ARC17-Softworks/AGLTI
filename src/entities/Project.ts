@@ -56,7 +56,7 @@ export class Offered {
 }
 
 @ObjectType()
-class Task {
+export class Task {
 	@Field(() => ID)
 	id?: string;
 
