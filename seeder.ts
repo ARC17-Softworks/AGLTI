@@ -27,24 +27,24 @@ const users = JSON.parse(
 );
 
 const profiles = JSON.parse(
-	fs.readFileSync(`${__dirname}/_data/profiles.json`, 'utf-8')
+	fs.readFileSync(`${__dirname}/_data/profiles_v2.json`, 'utf-8')
 );
 
-// const projects = JSON.parse(
-// 	fs.readFileSync(`${__dirname}/_data/projects_v3.json`, 'utf-8')
-// );
+const projects = JSON.parse(
+	fs.readFileSync(`${__dirname}/_data/projects.json`, 'utf-8')
+);
 
-// const positions = JSON.parse(
-// 	fs.readFileSync(`${__dirname}/_data/positions_v3.json`, 'utf-8')
-// );
+const positions = JSON.parse(
+	fs.readFileSync(`${__dirname}/_data/positions.json`, 'utf-8')
+);
 
 // import into DB
 const importData = async () => {
 	try {
 		await User.create(users);
 		await Profile.create(profiles);
-		// await Project.create(projects);
-		// await Position.create(positions);
+		await Project.create(projects);
+		await Position.create(positions);
 		console.log('Data Imported...'.green.inverse);
 		process.exit();
 	} catch (err) {
