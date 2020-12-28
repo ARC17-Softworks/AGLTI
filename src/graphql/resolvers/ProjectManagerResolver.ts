@@ -8,6 +8,8 @@ import { authorize, protect } from '../../middleware/auth';
 import { PositionInput } from '../types/InputTypes';
 import { MyContext } from '../types/MyContext';
 import mongoose from 'mongoose';
+import { Ref } from '@typegoose/typegoose';
+import { User } from '../../entities/User';
 
 @Resolver()
 export class ProjectManagerResolver {
@@ -198,5 +200,31 @@ export class ProjectManagerResolver {
 		} finally {
 			session.endSession();
 		}
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
+	async assignTask(
+		@Arg('userId') userId: string,
+		@Arg('title') title: string,
+		@Arg('description') description: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+		if (
+			!project!.members!.some(
+				(member) => member.dev!.toString() === userId.toString()
+			)
+		) {
+			throw new ApolloError('user not member of project');
+		}
+
+		project!.tasks!.push({
+			dev: (userId as unknown) as Ref<User>,
+			title,
+			description,
+		});
+		await project!.save();
+		return true;
 	}
 }

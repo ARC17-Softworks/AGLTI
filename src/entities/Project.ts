@@ -58,11 +58,11 @@ export class Offered {
 @ObjectType()
 class Task {
 	@Field(() => ID)
-	id!: string;
+	id?: string;
 
-	@Field(() => [User])
-	@prop({ type: () => [User], ref: () => User, required: true })
-	devs!: Ref<User>[];
+	@Field(() => User)
+	@prop({ type: () => User, ref: () => User, required: true })
+	dev!: Ref<User>;
 
 	@Field()
 	@prop({ trim: true, required: [true, 'please add a title'] })
@@ -103,7 +103,7 @@ class Task {
 @ObjectType()
 class Comment {
 	@Field(() => ID)
-	id!: string;
+	id?: string;
 
 	@Field(() => User)
 	@prop({ type: () => User, ref: () => User, required: true })
@@ -125,7 +125,7 @@ class Comment {
 @ObjectType()
 class Post {
 	@Field(() => ID)
-	id!: string;
+	id?: string;
 
 	@Field(() => User)
 	@prop({ type: () => User, ref: () => User, required: true })
