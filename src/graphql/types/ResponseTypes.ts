@@ -1,7 +1,7 @@
 import { ObjectType, Field } from 'type-graphql';
 import { Position } from '../../entities/Position';
 import { Profile, Projects } from '../../entities/Profile';
-import { Project } from '../../entities/Project';
+import { Post, Project } from '../../entities/Project';
 import { User } from '../../entities/User';
 
 @ObjectType()
@@ -92,4 +92,13 @@ export class Repository {
 export class RepositoriesResponse {
 	@Field(() => [Repository])
 	repositories!: Repository[];
+}
+
+@ObjectType()
+export class PostsResponse {
+	@Field(() => [Post], { nullable: true })
+	posts?: Post[];
+
+	@Field(() => Pagiantion, { nullable: true })
+	pagination?: Pagiantion;
 }

@@ -5,15 +5,16 @@ import {
 	Arg,
 	Ctx,
 	Mutation,
-	// Query,
+	Query,
 	Resolver,
 	UseMiddleware,
 } from 'type-graphql';
 import { Comment, Post, Project, ProjectModel } from '../../entities/Project';
 import { User } from '../../entities/User';
 import { authorize, protect } from '../../middleware/auth';
-import { PostInput } from '../types/InputTypes';
+import { PaginationInput, PostInput } from '../types/InputTypes';
 import { MyContext } from '../types/MyContext';
+import { Pagiantion, PostsResponse } from '../types/ResponseTypes';
 
 @Resolver()
 export class ForumResolver {
@@ -145,5 +146,58 @@ export class ForumResolver {
 		await project!.save();
 
 		return true;
+	}
+
+	@Query(() => PostsResponse)
+	@UseMiddleware(protect, authorize('BOTH'))
+	async getPosts(
+		@Arg('input')
+		{ page, limit }: PaginationInput,
+		@Ctx() ctx: MyContext
+	) {
+		const project = await ProjectModel.findById(ctx.req.project)
+			.select(
+				'-_id -__v -owner -title -description -closed -openings -members -previousMembers -applicants -offered -tasks -posts.comments'
+			)
+			.populate('posts.user', 'id name avatar');
+
+		let posts = project!.posts as Post[];
+
+		// pagination
+		const pagination: Pagiantion = {};
+		if (!page) page = 1;
+		if (!limit) limit = 20;
+		const startIndex = (page - 1) * limit;
+		const endIndex = page * limit;
+		const total = posts!.length;
+
+		posts = posts.slice(startIndex, endIndex);
+		// posts = posts.map((post) => ({
+		// 	_id: post.id,
+		// 	user: post.user,
+		// 	title: post.title,
+		// 	text: post.text,
+		// 	date: post.date,
+		// }));
+
+		if (endIndex < total) {
+			pagination.next = {
+				page: page + 1,
+				limit,
+			};
+		}
+
+		if (startIndex > 0) {
+			pagination.prev = {
+				page: page - 1,
+				limit,
+			};
+		}
+
+		pagination.pages = Math.ceil(total / limit);
+		pagination.total = total;
+		pagination.count = posts.length;
+
+		return { posts, pagination };
 	}
 }
