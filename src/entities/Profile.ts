@@ -173,18 +173,18 @@ class RecivedMessageThread {
 }
 
 @ObjectType()
-class Mention {
+export class Mention {
 	@Field(() => ID)
 	@prop({ type: () => Schema.Types.ObjectId })
 	post?: Schema.Types.ObjectId;
 
-	@Field(() => ID)
+	@Field(() => ID, { nullable: true })
 	@prop({ type: () => Schema.Types.ObjectId })
 	comment?: Schema.Types.ObjectId;
 
 	@Field()
 	@prop({ default: false })
-	read!: boolean;
+	read?: boolean;
 }
 
 @ObjectType()

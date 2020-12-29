@@ -4,7 +4,7 @@
 	"description": "project management web app",
 	"main": "server.js",
 	"scripts": {
-		"dev:build": "fuser -k 5000/tcp & tsc -w",
+		"dev:build": "tsc -w",
 		"dev:run": "nodemon --trace-warnings dist/server.js --tls-min-v1.0",
 		"dev": "concurrently npm:dev:*"
 	},

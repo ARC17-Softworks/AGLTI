@@ -1,5 +1,6 @@
 import { DocumentType, Ref } from '@typegoose/typegoose';
 import { ApolloError } from 'apollo-server-express';
+import { Schema } from 'mongoose';
 import { Types } from 'mongoose';
 import {
 	Arg,
@@ -9,10 +10,11 @@ import {
 	Resolver,
 	UseMiddleware,
 } from 'type-graphql';
+import { Mention, ProfileModel } from '../../entities/Profile';
 import { Comment, Post, Project, ProjectModel } from '../../entities/Project';
 import { User } from '../../entities/User';
 import { authorize, protect } from '../../middleware/auth';
-import { PaginationInput, PostInput } from '../types/InputTypes';
+import { MentionInput, PaginationInput, PostInput } from '../types/InputTypes';
 import { MyContext } from '../types/MyContext';
 import {
 	CommentResponse,
@@ -236,7 +238,9 @@ export class ForumResolver {
 		@Arg('commentId') commentId: string,
 		@Ctx() ctx: MyContext
 	) {
-		const project = await ProjectModel.findById(ctx.req.project);
+		const project = await ProjectModel.findById(ctx.req.project)
+			.select('posts')
+			.populate('posts.comments.user', 'id name avatar');
 
 		const post = ((((project!
 			.posts! as Post[]) as unknown) as Types.DocumentArray<
@@ -256,5 +260,56 @@ export class ForumResolver {
 		}
 
 		return { comment };
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('BOTH'))
+	async notifyMention(
+		@Arg('input') { postId, commentId, userId }: MentionInput,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project).select(
+			'members posts'
+		);
+		const profile = await ProfileModel.findOne({ user: userId });
+		if (!profile) {
+			throw new ApolloError(`Resource not found with id of ${userId}`);
+		}
+
+		if (
+			!project!.members!.some(
+				(member) => member.dev!.toString() === userId.toString()
+			)
+		) {
+			throw new ApolloError('user not member of project');
+		}
+
+		const post = ((((project!
+			.posts! as Post[]) as unknown) as Types.DocumentArray<
+			DocumentType<Project>
+		>).id(postId) as unknown) as Post;
+
+		if (!post) {
+			throw new ApolloError(`Resource not found with id of ${postId}`);
+		}
+
+		const mention: Mention = {
+			post: (post.id as unknown) as Schema.Types.ObjectId,
+		};
+
+		if (commentId) {
+			const comment = ((((post.comments! as Comment[]) as unknown) as Types.DocumentArray<
+				DocumentType<Project>
+			>).id(commentId) as unknown) as Comment;
+
+			if (!comment) {
+				throw new ApolloError(`Resource not found with id of ${commentId}`);
+			}
+			mention.comment = (comment.id as unknown) as Schema.Types.ObjectId;
+		}
+
+		profile.mentions!.push(mention);
+		await profile.save();
+		return true;
 	}
 }

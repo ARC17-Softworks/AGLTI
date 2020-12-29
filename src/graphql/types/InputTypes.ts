@@ -69,9 +69,21 @@ export class PositionSearchInput extends PaginationInput {
 
 @InputType()
 export class PostInput {
-	@Field(() => String)
+	@Field()
 	title!: string;
 
-	@Field(() => String)
+	@Field()
 	text!: string;
+}
+
+@InputType()
+export class MentionInput {
+	@Field()
+	postId!: string;
+
+	@Field({ nullable: true })
+	commentId?: string;
+
+	@Field()
+	userId!: string;
 }
