@@ -112,7 +112,6 @@ export class Comment {
 	@Field()
 	@prop({
 		trim: true,
-		minlength: 50,
 		required: [true, 'please add comment text'],
 	})
 	text!: string;
