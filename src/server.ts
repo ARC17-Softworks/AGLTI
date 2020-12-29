@@ -16,6 +16,7 @@ import { HiringResolver } from './graphql/resolvers/HiringResolver';
 import { JobHuntingResolver } from './graphql/resolvers/JobHuntingResolver';
 import { DeveloperResolver } from './graphql/resolvers/DeveloperResolver';
 import { SearchResolver } from './graphql/resolvers/SearchResolver';
+import { ForumResolver } from './graphql/resolvers/ForumResolver';
 
 const env = dotenv.config({ path: './config/config.env' });
 if (env.error) {
@@ -40,6 +41,7 @@ const main = async () => {
 				JobHuntingResolver,
 				DeveloperResolver,
 				SearchResolver,
+				ForumResolver,
 			],
 			validate: true,
 		}),

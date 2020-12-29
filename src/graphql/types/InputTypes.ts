@@ -66,3 +66,12 @@ export class PositionSearchInput extends PaginationInput {
 	@Field(() => [String], { nullable: true })
 	qskills?: string[];
 }
+
+@InputType()
+export class PostInput {
+	@Field(() => String)
+	title!: string;
+
+	@Field(() => String)
+	text!: string;
+}
