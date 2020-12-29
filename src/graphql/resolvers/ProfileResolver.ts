@@ -1,4 +1,5 @@
 import { ApolloError } from 'apollo-server-express';
+import fetch from 'node-fetch';
 import {
 	Arg,
 	Ctx,
@@ -16,6 +17,7 @@ import {
 	Pagiantion,
 	ProfileResponse,
 	ProjectsResponse,
+	RepositoriesResponse,
 } from '../types/ResponseTypes';
 
 @Resolver()
@@ -219,6 +221,38 @@ export class ProfileResolver {
 		pagination.count = projects.projects!.length;
 
 		return { projects: projects.projects, pagination };
+	}
+
+	@Query(() => RepositoriesResponse)
+	@UseMiddleware(protect)
+	async getGitHubRepos(
+		@Arg('username')
+		username: string
+	) {
+		const url = 'https://api.github.com/graphql';
+		const query = `query {
+			user(login: "${username}") {
+			  repositories(last:5){
+				nodes{
+				  name
+				}
+			  }
+			  
+			}
+		  }
+		  `;
+		const options = {
+			method: 'Post',
+			headers: {
+				Authorization: `Bearer ${process.env.GITHUB_ACCESS_TOKEN}`,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ query }),
+		};
+
+		const response = await fetch(url, options).then((res) => res.json());
+
+		return { repositories: response.data.user.repositories.nodes };
 	}
 
 	@Mutation(() => Boolean)

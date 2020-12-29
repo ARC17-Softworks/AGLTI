@@ -81,3 +81,15 @@ export class PositionsResponse {
 	@Field(() => Pagiantion, { nullable: true })
 	pagination?: Pagiantion;
 }
+
+@ObjectType()
+export class Repository {
+	@Field(() => String)
+	name!: string;
+}
+
+@ObjectType()
+export class RepositoriesResponse {
+	@Field(() => [Repository])
+	repositories!: Repository[];
+}

@@ -22,7 +22,7 @@ export class SearchResolver {
 	async searchDevelopers(
 		@Arg('input') { positionId, page, limit }: DevSearchInput,
 		@Ctx() ctx: MyContext
-	): Promise<ProfilesResponse> {
+	) {
 		const project = await ProjectModel.findById(ctx.req.project);
 		const position = await PostionModel.findById(positionId);
 
@@ -109,7 +109,7 @@ export class SearchResolver {
 	async searchPositions(
 		@Arg('input') { qskills, page, limit }: PositionSearchInput,
 		@Ctx() ctx: MyContext
-	): Promise<PositionsResponse> {
+	) {
 		const profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
 
 		if (profile!.activeProject) {
