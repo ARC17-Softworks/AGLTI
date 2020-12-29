@@ -101,7 +101,7 @@ export class Task {
 }
 
 @ObjectType()
-class Comment {
+export class Comment {
 	@Field(() => ID)
 	id?: string;
 
@@ -123,7 +123,7 @@ class Comment {
 }
 
 @ObjectType()
-class Post {
+export class Post {
 	@Field(() => ID)
 	id?: string;
 
