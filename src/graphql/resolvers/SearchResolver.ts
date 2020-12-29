@@ -7,9 +7,13 @@ import { ProfileModel } from '../../entities/Profile';
 import { ProjectModel } from '../../entities/Project';
 import { User } from '../../entities/User';
 import { authorize, protect } from '../../middleware/auth';
-import { DevSearchInput } from '../types/InputTypes';
+import { DevSearchInput, PositionSearchInput } from '../types/InputTypes';
 import { MyContext } from '../types/MyContext';
-import { Pagiantion, ProfilesResponse } from '../types/ResponseTypes';
+import {
+	Pagiantion,
+	PositionsResponse,
+	ProfilesResponse,
+} from '../types/ResponseTypes';
 
 @Resolver()
 export class SearchResolver {
@@ -98,5 +102,71 @@ export class SearchResolver {
 		pagination.count = profiles.length;
 
 		return { position, profiles, pagination };
+	}
+
+	@Query(() => PositionsResponse)
+	@UseMiddleware(protect)
+	async searchPositions(
+		@Arg('input') { qskills, page, limit }: PositionSearchInput,
+		@Ctx() ctx: MyContext
+	): Promise<PositionsResponse> {
+		const profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
+
+		if (profile!.activeProject) {
+			throw new ApolloError('user already part of a project');
+		}
+
+		const app = profile!.applied!.map((app) => app.position);
+		const off = profile!.offers!.map((off) => off.position);
+		const exclude = app.concat(off);
+
+		if (!qskills) {
+			qskills = profile!.skills;
+		}
+
+		// pagination
+		page = page || 1;
+		limit = 20;
+		const startIndex = (page - 1) * limit;
+		const endIndex = page * limit;
+		const total = await PostionModel.countDocuments({
+			$or: [
+				{ $expr: { $setIsSubset: ['$skills', qskills] } },
+				{ skills: { $all: qskills } },
+			],
+			_id: { $nin: exclude },
+		});
+
+		const positions = await PostionModel.find({
+			$or: [
+				{ $expr: { $setIsSubset: ['$skills', qskills] } },
+				{ skills: { $all: qskills } },
+			],
+			_id: { $nin: exclude },
+		})
+			.skip(startIndex)
+			.limit(limit)
+			.populate('project', 'title');
+
+		const pagination: Pagiantion = {};
+
+		if (endIndex < total) {
+			pagination.next = {
+				page: page + 1,
+				limit,
+			};
+		}
+
+		if (startIndex > 0) {
+			pagination.prev = {
+				page: page - 1,
+				limit,
+			};
+		}
+		pagination.pages = Math.ceil(total / limit);
+		pagination.total = total;
+		pagination.count = positions.length;
+
+		return { qskills, positions, pagination };
 	}
 }

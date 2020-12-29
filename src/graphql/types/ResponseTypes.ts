@@ -30,10 +30,10 @@ export class Pagiantion {
 	@Field()
 	pages?: number;
 
-	@Field(() => PagiantionPage)
+	@Field(() => PagiantionPage, { nullable: true })
 	next?: PagiantionPage;
 
-	@Field(() => PagiantionPage)
+	@Field(() => PagiantionPage, { nullable: true })
 	prev?: PagiantionPage;
 
 	@Field()
@@ -65,6 +65,18 @@ export class ProfilesResponse {
 
 	@Field(() => [Profile], { nullable: true })
 	profiles?: Profile[];
+
+	@Field(() => Pagiantion, { nullable: true })
+	pagination?: Pagiantion;
+}
+
+@ObjectType()
+export class PositionsResponse {
+	@Field(() => [String])
+	qskills!: string[];
+
+	@Field(() => [Position], { nullable: true })
+	positions?: Position[];
 
 	@Field(() => Pagiantion, { nullable: true })
 	pagination?: Pagiantion;

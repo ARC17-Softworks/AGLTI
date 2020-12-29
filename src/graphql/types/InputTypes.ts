@@ -60,3 +60,9 @@ export class DevSearchInput extends PaginationInput {
 	@Field()
 	positionId!: string;
 }
+
+@InputType()
+export class PositionSearchInput extends PaginationInput {
+	@Field(() => [String], { nullable: true })
+	qskills?: string[];
+}
