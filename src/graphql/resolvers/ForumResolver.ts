@@ -15,6 +15,7 @@ import { authorize, protect } from '../../middleware/auth';
 import { PaginationInput, PostInput } from '../types/InputTypes';
 import { MyContext } from '../types/MyContext';
 import {
+	CommentResponse,
 	Pagiantion,
 	PostResponse,
 	PostsResponse,
@@ -226,5 +227,34 @@ export class ForumResolver {
 		}
 
 		return { post };
+	}
+
+	@Query(() => CommentResponse)
+	@UseMiddleware(protect, authorize('BOTH'))
+	async getComment(
+		@Arg('postId') postId: string,
+		@Arg('commentId') commentId: string,
+		@Ctx() ctx: MyContext
+	) {
+		const project = await ProjectModel.findById(ctx.req.project);
+
+		const post = ((((project!
+			.posts! as Post[]) as unknown) as Types.DocumentArray<
+			DocumentType<Project>
+		>).id(postId) as unknown) as Post;
+
+		if (!post) {
+			throw new ApolloError(`Resource not found with id of ${postId}`);
+		}
+
+		const comment = ((((post.comments! as Comment[]) as unknown) as Types.DocumentArray<
+			DocumentType<Project>
+		>).id(commentId) as unknown) as Comment;
+
+		if (!comment) {
+			throw new ApolloError(`Resource not found with id of ${commentId}`);
+		}
+
+		return { comment };
 	}
 }

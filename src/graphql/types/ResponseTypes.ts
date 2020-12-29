@@ -1,7 +1,7 @@
 import { ObjectType, Field } from 'type-graphql';
 import { Position } from '../../entities/Position';
 import { Profile, Projects } from '../../entities/Profile';
-import { Post, Project } from '../../entities/Project';
+import { Comment, Post, Project } from '../../entities/Project';
 import { User } from '../../entities/User';
 
 @ObjectType()
@@ -107,4 +107,10 @@ export class PostsResponse {
 export class PostResponse {
 	@Field(() => Post, { nullable: true })
 	post?: Post;
+}
+
+@ObjectType()
+export class CommentResponse {
+	@Field(() => Comment, { nullable: true })
+	comment?: Comment;
 }
