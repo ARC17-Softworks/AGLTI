@@ -102,3 +102,9 @@ export class PostsResponse {
 	@Field(() => Pagiantion, { nullable: true })
 	pagination?: Pagiantion;
 }
+
+@ObjectType()
+export class PostResponse {
+	@Field(() => Post, { nullable: true })
+	post?: Post;
+}

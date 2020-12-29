@@ -14,7 +14,11 @@ import { User } from '../../entities/User';
 import { authorize, protect } from '../../middleware/auth';
 import { PaginationInput, PostInput } from '../types/InputTypes';
 import { MyContext } from '../types/MyContext';
-import { Pagiantion, PostsResponse } from '../types/ResponseTypes';
+import {
+	Pagiantion,
+	PostResponse,
+	PostsResponse,
+} from '../types/ResponseTypes';
 
 @Resolver()
 export class ForumResolver {
@@ -199,5 +203,28 @@ export class ForumResolver {
 		pagination.count = posts.length;
 
 		return { posts, pagination };
+	}
+
+	@Query(() => PostResponse)
+	@UseMiddleware(protect, authorize('BOTH'))
+	async getPost(
+		@Arg('postId')
+		postId: string,
+		@Ctx() ctx: MyContext
+	) {
+		let project = await ProjectModel.findById(ctx.req.project)
+			.select('posts')
+			.populate('posts.user', 'id name avatar')
+			.populate('posts.comments.user', 'id name avatar');
+		const post = ((((project!
+			.posts! as Post[]) as unknown) as Types.DocumentArray<
+			DocumentType<Project>
+		>).id(postId) as unknown) as Post;
+
+		if (!post) {
+			throw new ApolloError(`Resource not found with id of ${postId}`);
+		}
+
+		return { post };
 	}
 }
