@@ -54,3 +54,9 @@ export class PositionInput {
 	@Field()
 	description!: string;
 }
+
+@InputType()
+export class DevSearchInput extends PaginationInput {
+	@Field()
+	positionId!: string;
+}

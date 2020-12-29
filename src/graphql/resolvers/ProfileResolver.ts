@@ -172,7 +172,7 @@ export class ProfileResolver {
 		pagination.total = total;
 		pagination.count = projects.projects!.length;
 
-		return { projects, pagination };
+		return { projects: projects.projects, pagination };
 	}
 
 	@Query(() => ProjectsResponse)
@@ -218,7 +218,7 @@ export class ProfileResolver {
 		pagination.total = total;
 		pagination.count = projects.projects!.length;
 
-		return { projects, pagination };
+		return { projects: projects.projects, pagination };
 	}
 
 	@Mutation(() => Boolean)

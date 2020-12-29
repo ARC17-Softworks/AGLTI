@@ -27,15 +27,15 @@ const users = JSON.parse(
 );
 
 const profiles = JSON.parse(
-	fs.readFileSync(`${__dirname}/_data/profiles_v2.json`, 'utf-8')
+	fs.readFileSync(`${__dirname}/_data/profiles_v3.json`, 'utf-8')
 );
 
 const projects = JSON.parse(
-	fs.readFileSync(`${__dirname}/_data/projects.json`, 'utf-8')
+	fs.readFileSync(`${__dirname}/_data/projects_v3.json`, 'utf-8')
 );
 
 const positions = JSON.parse(
-	fs.readFileSync(`${__dirname}/_data/positions.json`, 'utf-8')
+	fs.readFileSync(`${__dirname}/_data/positions_v3.json`, 'utf-8')
 );
 
 // import into DB

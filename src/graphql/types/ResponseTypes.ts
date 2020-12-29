@@ -1,4 +1,5 @@
 import { ObjectType, Field } from 'type-graphql';
+import { Position } from '../../entities/Position';
 import { Profile, Projects } from '../../entities/Profile';
 import { Project } from '../../entities/Project';
 import { User } from '../../entities/User';
@@ -55,4 +56,16 @@ export class ProjectsResponse {
 export class ProjectResponse {
 	@Field(() => Project)
 	project!: Project;
+}
+
+@ObjectType()
+export class ProfilesResponse {
+	@Field(() => Position)
+	position!: Position;
+
+	@Field(() => [Profile], { nullable: true })
+	profiles?: Profile[];
+
+	@Field(() => Pagiantion, { nullable: true })
+	pagination?: Pagiantion;
 }
