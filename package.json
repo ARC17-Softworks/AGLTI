@@ -21,7 +21,7 @@
 	"dependencies": {
 		"@typegoose/typegoose": "^7.4.5",
 		"type-graphql": "^1.1.1",
-		"apollo-server-express": "^2.19.0",
+		"apollo-server-express": "^2.19.1",
 		"bcryptjs": "^2.4.3",
 		"class-validator": "^0.12.2",
 		"colors": "^1.4.0",
