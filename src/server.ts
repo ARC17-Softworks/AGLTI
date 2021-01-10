@@ -18,6 +18,7 @@ import { DeveloperResolver } from './graphql/resolvers/DeveloperResolver';
 import { SearchResolver } from './graphql/resolvers/SearchResolver';
 import { ForumResolver } from './graphql/resolvers/ForumResolver';
 import { ReportResolver } from './graphql/resolvers/ReportResolver';
+import { NotificationResolver } from './graphql/resolvers/NotificationResolver';
 
 const env = dotenv.config({ path: './config/config.env' });
 if (env.error) {
@@ -44,6 +45,7 @@ const main = async () => {
 				SearchResolver,
 				ForumResolver,
 				ReportResolver,
+				NotificationResolver,
 			],
 			validate: true,
 		}),
