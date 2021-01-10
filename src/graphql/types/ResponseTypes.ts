@@ -114,3 +114,21 @@ export class CommentResponse {
 	@Field(() => Comment, { nullable: true })
 	comment?: Comment;
 }
+
+@ObjectType()
+export class NotificationResponse {
+	@Field({ nullable: true })
+	messages?: number;
+
+	@Field({ nullable: true })
+	incomingRequests?: number;
+
+	@Field({ nullable: true })
+	offers?: number;
+
+	@Field({ nullable: true })
+	tasks?: number;
+
+	@Field({ nullable: true })
+	mentions?: number;
+}
