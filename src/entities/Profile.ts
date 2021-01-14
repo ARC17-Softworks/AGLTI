@@ -113,9 +113,9 @@ export class Offers {
 	@prop({ type: () => Position, ref: () => Position, required: true })
 	position!: Ref<Position>;
 
-	@Field({ nullable: true })
+	@Field()
 	@prop({ default: false })
-	read!: boolean;
+	read?: boolean;
 }
 
 @ObjectType()
@@ -147,7 +147,7 @@ class IncomingRequest {
 
 	@Field()
 	@prop({ default: false })
-	read!: boolean;
+	read?: boolean;
 }
 
 @ObjectType()
@@ -169,7 +169,7 @@ class RecivedMessageThread {
 
 	@Field()
 	@prop({ default: false })
-	read!: boolean;
+	read?: boolean;
 }
 
 @ObjectType()

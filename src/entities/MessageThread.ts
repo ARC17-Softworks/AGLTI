@@ -1,5 +1,5 @@
 import { ObjectType, Field, ID } from 'type-graphql';
-import { prop, getModelForClass, Ref } from '@typegoose/typegoose';
+import { prop, getModelForClass, Ref, pre } from '@typegoose/typegoose';
 import { User } from './User';
 
 @ObjectType()
@@ -17,6 +17,11 @@ class Message {
 	date?: Date;
 }
 
+@pre<MessageThread>('save', async function (next) {
+	if (this.users.length !== 2) {
+		next(new Error('users array can only contain two people'));
+	}
+})
 @ObjectType()
 export class MessageThread {
 	@Field(() => ID)
@@ -26,10 +31,6 @@ export class MessageThread {
 	@prop({
 		type: () => [User],
 		ref: () => User,
-		validate: {
-			validator: (val) => val.length == 2,
-			message: 'users array can only contain two people',
-		},
 	})
 	users!: Ref<User>[];
 
