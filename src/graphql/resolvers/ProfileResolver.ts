@@ -94,11 +94,12 @@ export class ProfileResolver {
 				path: 'applied.position',
 				populate: { path: 'project', select: 'title' },
 			})
-			.populate('contacts.contact', 'name avatar')
-			.populate('outgoingRequests.user', 'name avatar')
-			.populate('incomingRequests.user', 'name avatar')
-			.populate('blocked.user', 'name avatar')
-			.populate('messages.with', 'name avatar');
+			.populate('contacts.contact', 'id name avatar')
+			.populate('outgoingRequests.user', 'id name avatar')
+			.populate('incomingRequests.user', 'id name avatar')
+			.populate('blocked.user', 'id name avatar')
+			.populate('messages.with', 'id name avatar')
+			.populate('messages.thread', 'id');
 
 		if (!profile) {
 			throw new ApolloError(

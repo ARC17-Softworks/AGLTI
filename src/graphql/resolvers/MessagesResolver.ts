@@ -4,7 +4,7 @@ import {
 	Arg,
 	Ctx,
 	Mutation,
-	// Query,
+	Query,
 	Resolver,
 	UseMiddleware,
 } from 'type-graphql';
@@ -13,6 +13,7 @@ import { ProfileModel } from '../../entities/Profile';
 import { User } from '../../entities/User';
 import { protect } from '../../middleware/auth';
 import { MyContext } from '../types/MyContext';
+import { MessageThreadResponse } from '../types/ResponseTypes';
 
 @Resolver()
 export class MessagesResolver {
@@ -95,5 +96,29 @@ export class MessagesResolver {
 		}
 
 		return true;
+	}
+
+	@Query(() => MessageThreadResponse)
+	@UseMiddleware(protect)
+	async getThread(@Arg('threadId') threadId: string, @Ctx() ctx: MyContext) {
+		const messageThread = await MessageThreadModel.findById(threadId)
+			.populate('users', 'id name avatar')
+			.populate('messages.from', 'id name avatar');
+
+		// thread does not exist
+		if (!messageThread) {
+			throw new ApolloError(`Resource not found with id of ${threadId}`);
+		}
+
+		// user not part of thread
+		if (
+			!messageThread.users.some(
+				(user) => (user as User).id.toString() === ctx.req.user!.id.toString()
+			)
+		) {
+			throw new ApolloError('Not authorised to access this resource');
+		}
+
+		return { thread: messageThread };
 	}
 }
