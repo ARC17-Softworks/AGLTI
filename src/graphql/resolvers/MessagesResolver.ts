@@ -98,6 +98,52 @@ export class MessagesResolver {
 		return true;
 	}
 
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect)
+	async deleteMessage(
+		@Arg('messageId') messageId: string,
+		@Arg('threadId') threadId: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const messageThread = await MessageThreadModel.findById(threadId);
+
+		// thread does not exist
+		if (!messageThread) {
+			throw new ApolloError(`Resource not found with id of ${threadId}`);
+		}
+
+		// user not part of thread
+		if (
+			!messageThread.users.some(
+				(user) => user!.toString() === ctx.req.user!.id.toString()
+			)
+		) {
+			throw new ApolloError('Not authorised to access this resource');
+		}
+
+		const message = messageThread.messages!.find(
+			(message) => message.id!.toString() === messageId.toString()
+		);
+
+		// message exist in thread
+		if (!message) {
+			throw new ApolloError(`Resource not found with id of ${messageId}`);
+		}
+
+		// message belongs to user
+		if (message.from!.toString() !== ctx.req.user!.id.toString()) {
+			throw new ApolloError('Not authorised to access this resource');
+		}
+
+		messageThread.messages = messageThread.messages!.filter(
+			(message) => message.id!.toString() != messageId.toString()
+		);
+
+		await messageThread.save();
+
+		return true;
+	}
+
 	@Query(() => MessageThreadResponse)
 	@UseMiddleware(protect)
 	async getThread(@Arg('threadId') threadId: string, @Ctx() ctx: MyContext) {
