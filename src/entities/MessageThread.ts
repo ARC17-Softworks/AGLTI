@@ -4,6 +4,9 @@ import { User } from './User';
 
 @ObjectType()
 class Message {
+	@Field(() => ID)
+	id?: string;
+
 	@Field(() => User)
 	@prop({ type: () => User, ref: () => User })
 	from!: Ref<User>;
