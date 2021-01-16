@@ -8,7 +8,7 @@ export interface sendEmailOptions {
 	body: string;
 	link: string;
 	linkName: string;
-	cc?: string;
+	cc?: string[];
 }
 
 export async function sendEmail(options: sendEmailOptions) {

@@ -1,4 +1,5 @@
 import { ObjectType, Field } from 'type-graphql';
+import { MessageThread } from '../../entities/MessageThread';
 import { Position } from '../../entities/Position';
 import { Profile, Projects } from '../../entities/Profile';
 import { Comment, Post, Project } from '../../entities/Project';
@@ -113,4 +114,28 @@ export class PostResponse {
 export class CommentResponse {
 	@Field(() => Comment, { nullable: true })
 	comment?: Comment;
+}
+
+@ObjectType()
+export class NotificationResponse {
+	@Field({ nullable: true })
+	messages?: number;
+
+	@Field({ nullable: true })
+	incomingRequests?: number;
+
+	@Field({ nullable: true })
+	offers?: number;
+
+	@Field({ nullable: true })
+	tasks?: number;
+
+	@Field({ nullable: true })
+	mentions?: number;
+}
+
+@ObjectType()
+export class MessageThreadResponse {
+	@Field(() => MessageThread, { nullable: true })
+	thread?: MessageThread;
 }
