@@ -304,4 +304,33 @@ export class ContactsResolver {
 
 		return true;
 	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect)
+	async unblockUser(
+		@Arg('userId') userId: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
+		const blockuser = await ProfileModel.findOne({ user: userId });
+
+		if (!blockuser) {
+			throw new ApolloError(`Resource not found with id of ${userId}`);
+		}
+
+		if (
+			!profile!.blocked!.some(
+				(user) => user.user!.toString() === userId.toString()
+			)
+		) {
+			throw new ApolloError('user not in blocked list');
+		}
+
+		profile!.blocked = profile!.blocked!.filter(
+			(block) => block.user!.toString() != userId.toString()
+		);
+
+		await profile!.save();
+		return true;
+	}
 }
