@@ -1,13 +1,6 @@
 import { Ref } from '@typegoose/typegoose';
 import { ApolloError } from 'apollo-server-express';
-import {
-	Arg,
-	Ctx,
-	Mutation,
-	// Query,
-	Resolver,
-	UseMiddleware,
-} from 'type-graphql';
+import { Arg, Ctx, Mutation, Resolver, UseMiddleware } from 'type-graphql';
 import { ProfileModel } from '../../entities/Profile';
 import { User, UserModel } from '../../entities/User';
 import { protect } from '../../middleware/auth';
@@ -193,6 +186,41 @@ export class ContactsResolver {
 		sender!.outgoingRequests = sender!.outgoingRequests!.filter(
 			(request) => request.user!.toString() != ctx.req.user!.id.toString()
 		);
+
+		await profile!.save();
+		await sender!.save();
+
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect)
+	async acceptRequest(
+		@Arg('userId') userId: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
+		const sender = await ProfileModel.findOne({ user: userId });
+
+		if (
+			!profile!.incomingRequests!.some(
+				(request) => request.user!.toString() === userId.toString()
+			)
+		) {
+			throw new ApolloError('requst not found');
+		}
+
+		profile!.incomingRequests = profile!.incomingRequests!.filter(
+			(request) => request.user!.toString() != userId.toString()
+		);
+		sender!.outgoingRequests = sender!.outgoingRequests!.filter(
+			(request) => request.user!.toString() != ctx.req.user!.id.toString()
+		);
+
+		profile!.contacts!.push({ contact: (userId as unknown) as Ref<User> });
+		sender!.contacts!.push({
+			contact: (ctx.req.user!.id as unknown) as Ref<User>,
+		});
 
 		await profile!.save();
 		await sender!.save();
