@@ -227,4 +227,34 @@ export class ContactsResolver {
 
 		return true;
 	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect)
+	async removeContact(
+		@Arg('userId') userId: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
+		const contactProfile = await ProfileModel.findOne({ user: userId });
+
+		if (
+			!profile!.contacts!.some(
+				(contact) => contact.contact!.toString() === userId.toString()
+			)
+		) {
+			throw new ApolloError('contact not found');
+		}
+
+		profile!.contacts = profile!.contacts!.filter(
+			(contact) => contact.contact!.toString() != userId.toString()
+		);
+		contactProfile!.contacts = contactProfile!.contacts!.filter(
+			(contact) => contact.contact!.toString() != ctx.req.user!.id.toString()
+		);
+
+		await profile!.save();
+		await contactProfile!.save();
+
+		return true;
+	}
 }
