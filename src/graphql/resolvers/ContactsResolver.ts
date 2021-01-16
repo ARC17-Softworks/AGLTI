@@ -9,7 +9,7 @@ import {
 	UseMiddleware,
 } from 'type-graphql';
 import { ProfileModel } from '../../entities/Profile';
-import { User } from '../../entities/User';
+import { User, UserModel } from '../../entities/User';
 import { protect } from '../../middleware/auth';
 import { MyContext } from '../types/MyContext';
 
@@ -64,6 +64,73 @@ export class ContactsResolver {
 
 		profile!.outgoingRequests!.push({ user: (userId as unknown) as Ref<User> });
 		reciever.incomingRequests!.push({
+			user: (ctx.req.user!.id as unknown) as Ref<User>,
+		});
+
+		await profile!.save();
+		await reciever.save();
+
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect)
+	async sendRequestByEmail(
+		@Arg('email') email: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
+
+		if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+			throw new ApolloError('invalid email');
+		}
+
+		if (ctx.req.user!.email === email) {
+			throw new ApolloError('can not send request to self');
+		}
+
+		const recieverUser = await UserModel.findOne({ email: email });
+		if (!recieverUser) {
+			throw new ApolloError(`User not found with email of ${email}`);
+		}
+		const reciever = await ProfileModel.findOne({ user: recieverUser.id });
+		if (!reciever) {
+			throw new ApolloError(`Resource not found with id of ${recieverUser.id}`);
+		}
+
+		if (
+			profile!.contacts!.some(
+				(contact) => contact.contact!.toString() === recieverUser.id.toString()
+			)
+		) {
+			throw new ApolloError('user already in contacts');
+		}
+
+		if (
+			profile!.blocked!.some(
+				(user) => user.user!.toString() === recieverUser.id.toString()
+			)
+		) {
+			throw new ApolloError('user is blocked');
+		}
+
+		if (
+			profile!.outgoingRequests!.some(
+				(request) => request.user!.toString() === recieverUser.id.toString()
+			)
+		) {
+			throw new ApolloError('request already sent');
+		}
+		if (
+			profile!.incomingRequests!.some(
+				(request) => request.user!.toString() === recieverUser.id.toString()
+			)
+		) {
+			throw new ApolloError('user had already sent you a request');
+		}
+
+		profile!.outgoingRequests!.push({ user: recieverUser.id });
+		reciever!.incomingRequests!.push({
 			user: (ctx.req.user!.id as unknown) as Ref<User>,
 		});
 
