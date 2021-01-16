@@ -169,4 +169,34 @@ export class ContactsResolver {
 
 		return true;
 	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect)
+	async rejectRequest(
+		@Arg('userId') userId: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
+		const sender = await ProfileModel.findOne({ user: userId });
+
+		if (
+			!profile!.incomingRequests!.some(
+				(request) => request.user!.toString() === userId.toString()
+			)
+		) {
+			throw new ApolloError('requst not found');
+		}
+
+		profile!.incomingRequests = profile!.incomingRequests!.filter(
+			(request) => request.user!.toString() != userId.toString()
+		);
+		sender!.outgoingRequests = sender!.outgoingRequests!.filter(
+			(request) => request.user!.toString() != ctx.req.user!.id.toString()
+		);
+
+		await profile!.save();
+		await sender!.save();
+
+		return true;
+	}
 }
