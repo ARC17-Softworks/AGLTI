@@ -257,4 +257,51 @@ export class ContactsResolver {
 
 		return true;
 	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect)
+	async blockUser(
+		@Arg('userId') userId: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
+		const blockuser = await ProfileModel.findOne({ user: userId });
+
+		if (!blockuser) {
+			throw new ApolloError(`Resource not found with id of ${userId}`);
+		}
+
+		if (userId.toString() === ctx.req.user!.id.toString()) {
+			throw new ApolloError('can not block self');
+		}
+
+		if (
+			profile!.blocked!.some(
+				(user) => user.user!.toString() === userId.toString()
+			)
+		) {
+			throw new ApolloError('user already blocked');
+		}
+
+		if (
+			profile!.contacts!.some(
+				(contact) => contact.contact!.toString() === userId.toString()
+			)
+		) {
+			profile!.contacts = profile!.contacts!.filter(
+				(contact) => contact.contact!.toString() != userId.toString()
+			);
+			blockuser.contacts = blockuser.contacts!.filter(
+				(contact) => contact.contact!.toString() != ctx.req.user!.id.toString()
+			);
+
+			await blockuser.save();
+		}
+
+		profile!.blocked!.push({ user: (userId as unknown) as Ref<User> });
+
+		await profile!.save();
+
+		return true;
+	}
 }
