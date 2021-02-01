@@ -19,7 +19,7 @@
 	},
 	"homepage": "https://aglti.tech/",
 	"dependencies": {
-		"@typegoose/typegoose": "^7.4.6",
+		"@typegoose/typegoose": "^7.4.8",
 		"type-graphql": "^1.1.1",
 		"apollo-server-express": "^2.19.2",
 		"bcryptjs": "^2.4.3",
