@@ -4,10 +4,10 @@ node_js:
 dist: trusty
 services:
   - mongodb
-  -redis-server
+  - redis-server
 branches:
   only:
-  - master
+    - master
 script:
   - npm run build
 deploy:
