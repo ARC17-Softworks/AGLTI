@@ -13,3 +13,4 @@ script:
 deploy:
   provider: heroku
   api_key: 7e450c9d-dc92-44df-8bba-284ac8717832
+  app: aglti-backend
