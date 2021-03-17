@@ -8,7 +8,7 @@
 		"dev:run": "nodemon --trace-warnings dist/server.js --tls-min-v1.0",
 		"dev": "concurrently npm:dev:*",
 		"start": "node dist/server.js --tls-min-v1.0",
-		"build": "tsc -p"
+		"build": "tsc"
 	},
 	"repository": {
 		"type": "git",
