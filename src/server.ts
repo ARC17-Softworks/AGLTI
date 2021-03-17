@@ -5,7 +5,7 @@ import { db } from './services/db';
 import dotenv from 'dotenv';
 import 'colors';
 import 'reflect-metadata';
-import './services/cache';
+// import './services/cache';
 
 // resolvers
 import { AuthResolver } from './graphql/resolvers/AuthResolver';
