@@ -1,8 +1,8 @@
-import { ObjectType, Field, ID, InputType } from 'type-graphql';
-import { prop, getModelForClass, Ref } from '@typegoose/typegoose';
+import { ObjectType, Field /*ID, InputType*/ } from 'type-graphql';
+import { prop, /*getModelForClass,*/ Ref } from '@typegoose/typegoose';
 import { Project } from './Project';
 import { User } from './User';
-import { Schema } from 'mongoose';
+// import { Schema } from 'mongoose';
 
 @ObjectType()
 export class Review {
