@@ -1,16 +1,15 @@
 language: node_js
 node_js:
-- 14
+  - 14
 dist: trusty
 services:
-- mongodb
-- redis-server
+  - mongodb
+  - redis-server
 branches:
   only:
-  - master
+    - master
 script:
-- npm run build
+  - npm run build
 deploy:
   provider: heroku
-  api_key:
-    secure: c7XqZ9SdvW48AV+Y1XIXtsWDpGsB6lVbDIAVmfrNfeASWb32e2xxe9Wp5/judTayBD0iUWFBUzjn9R+R9cji9B1SWITAMCjRihC9gFK2L5eB3v5lYhc1rV9RvO1ZAbqqcCqDgDqOIDomjRT+icL9sNGKlLt3zT7BPHHOy0/01NxF8v9m0ZjarV5KodLcWTh1aQYfO5bFxNWnHsGv7v/p/RTsI6UWolYwzjd+/ZUp6J4cK1faBaGT1/POmO+sJ/zGhnsRpoaV5NPweVMwiVEZWxI8HozXH2XlJVVdRn5Ou4qjZAdPj1G8oUSGRbx4D2Q/cxHpKuzfYrFyww5Bkdufg/Zp7g9fYuaFh1NIlfwOt2A4Nn9EpYWHAvkFFIjbUXLnGfI23TxgwXuBLg3QhoMH0GEypTJ2xPReVC9GdWfuevYFsn6t8TOEmG8Ss0nlrDrRTEA4v04vb+2be/kE0AaF4gwE0QiJ/KnhqF+vBdhEITl/cp/+mrJujFFQUoVfo9rJDu7mnHuBgaQ1HsuWJn78JY4Mwl1kUqGwkcz0fQ72FjdyQ9o2FrNAtwjuWg8IWJN2/4EMR9HBX0Vwhw6+Gnwg4mmZR7nOVuARxdqOlmGPoT38IT1H1Wll8Tk+sNpwTuojfMqV1y3Pm44dMLKmJRJy+4znIXA+NtiJS/BJkP+79jE=
+  api_key: 7e450c9d-dc92-44df-8bba-284ac8717832
