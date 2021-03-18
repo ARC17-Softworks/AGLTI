@@ -1,15 +1,10 @@
-import { ObjectType, Field /*ID, InputType*/ } from 'type-graphql';
-import { prop, /*getModelForClass,*/ Ref } from '@typegoose/typegoose';
+import { ObjectType, Field, ID } from 'type-graphql';
+import { prop, getModelForClass, Ref } from '@typegoose/typegoose';
 import { Project } from './Project';
 import { User } from './User';
-// import { Schema } from 'mongoose';
 
 @ObjectType()
 export class Review {
-	@Field()
-	@prop()
-	rating!: number;
-
 	@Field(() => Project)
 	@prop({ type: () => Project, ref: () => Project })
 	proj!: Ref<Project>;
@@ -20,14 +15,13 @@ export class Review {
 }
 
 @ObjectType()
-export class ProfileReviews {
-	@Field()
-	@prop({ default: 4 })
-	totalScore?: number;
+export class ProfileReview {
+	@Field(() => ID)
+	id!: string;
 
 	@Field()
-	@prop()
-	averageRating?: number;
+	@prop({ default: 4 })
+	rating?: number;
 
 	@Field(() => User)
 	@prop({ type: () => User, ref: () => User, required: true })
@@ -37,3 +31,5 @@ export class ProfileReviews {
 	@prop({ type: () => [Review], _id: false })
 	reviews?: Review[];
 }
+
+export const ProfileReviewModel = getModelForClass(ProfileReview);

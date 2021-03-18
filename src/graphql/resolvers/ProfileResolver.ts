@@ -10,6 +10,7 @@ import {
 } from 'type-graphql';
 import { Education, Experience, ProfileModel } from '../../entities/Profile';
 import { UserModel } from '../../entities/User';
+import { ProfileReviewModel } from '../../entities/ProfileReview';
 import { protect } from '../../middleware/auth';
 import { PaginationInput, ProfileInput } from '../types/InputTypes';
 import { MyContext } from '../types/MyContext';
@@ -57,6 +58,10 @@ export class ProfileResolver {
 					bio,
 					location,
 					links,
+				});
+
+				await ProfileReviewModel.create({
+					user: ctx.req.user!.id,
 				});
 			} catch (err) {
 				throw new ApolloError('could not complete request');
