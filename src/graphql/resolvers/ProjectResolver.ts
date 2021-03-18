@@ -1,9 +1,19 @@
-import { Arg, Ctx, Resolver, Query, UseMiddleware } from 'type-graphql';
+import {
+	Arg,
+	Ctx,
+	Resolver,
+	Query,
+	UseMiddleware,
+	Mutation,
+} from 'type-graphql';
 import { ProjectResponse } from '../types/ResponseTypes';
+import { ProfileReviewModel } from '../../entities/ProfileReview';
 import { authorize, protect } from '../../middleware/auth';
-import { ProjectModel } from '../../entities/Project';
+import { Project, ProjectModel } from '../../entities/Project';
 import { MyContext } from '../types/MyContext';
 import { ApolloError } from 'apollo-server-express';
+import { Ref } from '@typegoose/typegoose';
+import { User } from '../../entities/User';
 
 @Resolver()
 export class ProjectResolver {
@@ -55,5 +65,43 @@ export class ProjectResolver {
 		}
 
 		return { project };
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('BOTH'))
+	async rateColleague(
+		@Arg('userId') userId: string,
+		@Arg('rating') rating: number,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const profileToReview = await ProfileReviewModel.findOne({ user: userId });
+
+		if (!profileToReview) {
+			throw new ApolloError(`Profile not found for user with id of ${userId}`);
+		}
+
+		if (
+			profileToReview.reviews!.some(
+				(review) =>
+					review.proj!.toString() === ctx.req.project!.toString() &&
+					review.reviewer!.toString() === ctx.req.user!.id.toString()
+			)
+		) {
+			throw new ApolloError('review already exists');
+		}
+
+		profileToReview.rating =
+			(profileToReview.rating! * (profileToReview.reviews!.length + 1) +
+				rating) /
+			(profileToReview.reviews!.length + 2);
+
+		profileToReview.reviews!.push({
+			proj: (ctx.req.project as unknown) as Ref<Project>,
+			reviewer: (ctx.req.user!.id as unknown) as Ref<User>,
+		});
+
+		await profileToReview.save();
+
+		return true;
 	}
 }
