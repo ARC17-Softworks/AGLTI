@@ -22,9 +22,11 @@ import { NotificationResolver } from './graphql/resolvers/NotificationResolver';
 import { MessagesResolver } from './graphql/resolvers/MessagesResolver';
 import { ContactsResolver } from './graphql/resolvers/ContactsResolver';
 
-const env = dotenv.config({ path: '.env' });
-if (env.error) {
-	throw env.error;
+if (process.env.NODE_ENV != 'production') {
+	const env = dotenv.config({ path: '.env' });
+	if (env.error) {
+		throw env.error;
+	}
 }
 
 const main = async () => {
