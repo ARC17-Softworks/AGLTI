@@ -63,7 +63,12 @@ const main = async () => {
 		},
 	});
 
-	server.applyMiddleware({ app, cors: true });
+	const corsOptions = {
+		origin: process.env.FRONTEND_URL as string,
+		credentials: true,
+	};
+
+	server.applyMiddleware({ app, cors: corsOptions });
 
 	app.listen(PORT, () =>
 		console.log(
