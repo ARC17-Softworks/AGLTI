@@ -1,0 +1,17 @@
+language: node_js
+node_js:
+- 14
+dist: trusty
+services:
+- mongodb
+- redis-server
+branches:
+  only:
+  - master
+script:
+- npm run build
+deploy:
+  provider: heroku
+  app: aglti-backend
+  api_key:
+    secure: Fq/qqZplkmO5LVxNXMZRbO4l43Um+lRq2j1xqhHTXsnXTotkZ7zELDM2e5wA5Kw7ic3EBoIbMI+dgVHi/qmGIsG/i9jfpWtKZ5bVLBR/eoiyQqKjmcLeC0dv7nMgFdICKEq/02W9SxvH7uvRNzRm8Fp+FIqlHuRzZqReL0t75bN71SKBv2qzHHKx4iwILj9ZLlnXifmTThdLAMKTeYU3ecErkapIbzUKRGr18BcwNLThSzMLHD8ah5PSuKm0beYKhGNRdxYKDcPL98QU9tGXohrH23qfmQImNxcw3KLNpqDSMPWQQmrXHM18SpE60x2J82MiAcA69P4bSKGhSOE0Jpo6qNRhUZP1afSiEununidtAoF3MqYQ3rr/WL9hEK5EC07KP43AI0MIn0ubdNL/w/qg674rztsx5j4fzMOdwuexRZCqooDQ+NfWumi6mPzX+PTnuDV4CU78qy5gc5lb93H7ZpOentrTizLon7tG/KIYxhST1ZDxFzDFwJXIljowYrQ1gxXnbl7E8Tc9kbBry2osr9cd5IUPW8WC+O4aegECc9/gdzoL20hP1HIuyfiqEvc7GxOs4EMjld5V540+g9S2pGKuvMbqysW6rlgIrBbV02Ie1xasQ2BuQv7a6nV/gvNUI9+SIgvKQQZ/oSPkvcshL4tV+3iOoH1t/D5Aj9Y=
