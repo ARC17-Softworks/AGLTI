@@ -56,11 +56,6 @@ const main = async () => {
 			validate: true,
 		}),
 		context: ({ req, res }) => ({ req, res }),
-		playground: {
-			settings: {
-				'request.credentials': 'include',
-			},
-		},
 	});
 
 	const corsOptions = {
