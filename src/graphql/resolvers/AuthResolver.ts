@@ -42,9 +42,9 @@ export class AuthResolver {
 			}
 		);
 
-		const registrationUrl = `${ctx.req.protocol}://${ctx.req.get(
-			'host'
-		)}//register&token=${registrationToken}`;
+		const registrationUrl = `${ctx.req.protocol}://${
+			process.env.FRONTEND_URL as string
+		}/register&token=${registrationToken}`;
 		try {
 			await sendEmail({
 				email: email,
