@@ -44,7 +44,7 @@ export class AuthResolver {
 
 		const registrationUrl = `${ctx.req.protocol}://${
 			process.env.FRONTEND_URL as string
-		}/register&token=${registrationToken}`;
+		}/register?token=${registrationToken}`;
 		try {
 			await sendEmail({
 				email: email,
@@ -186,9 +186,9 @@ export class AuthResolver {
 		await user!.save({ validateBeforeSave: false });
 
 		// create reset url
-		const resetUrl = `${ctx.req.protocol}://${ctx.req.get(
-			'host'
-		)}/resetpassword/${resetToken}`;
+		const resetUrl = `${ctx.req.protocol}://${
+			process.env.FRONTEND_URL as string
+		}/resetpassword/?token=${resetToken}`;
 
 		try {
 			await sendEmail({
