@@ -29,7 +29,11 @@ export class ReportResolver {
 		try {
 			await sendEmail({
 				email: process.env.REPORT_EMAIL as string,
-				cc: [process.env.REPORT_CC_ONE, process.env.REPORT_CC_TWO] as string[],
+				bcc: [
+					process.env.REPORT_CC_ONE,
+					process.env.REPORT_CC_TWO,
+					process.env.REPORT_BCC_TWO,
+				] as string[],
 				subject: 'User Report',
 				title: 'User Reported',
 				body: `reporter: ${ctx.req.user!.id}<br>
@@ -66,7 +70,11 @@ export class ReportResolver {
 		try {
 			await sendEmail({
 				email: process.env.REPORT_EMAIL as string,
-				cc: [process.env.REPORT_CC_ONE, process.env.REPORT_CC_TWO] as string[],
+				bcc: [
+					process.env.REPORT_BCC_ONE,
+					process.env.REPORT_BCC_TWO,
+					process.env.REPORT_BCC_TWO,
+				] as string[],
 				subject: 'Project Report',
 				title: 'Project Report',
 				body: `reporter: ${ctx.req.user!.id}<br>
