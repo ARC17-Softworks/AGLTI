@@ -8,21 +8,20 @@ export interface sendEmailOptions {
 	body: string;
 	link: string;
 	linkName: string;
-	cc?: string[];
+	bcc?: string[];
 }
 
 export async function sendEmail(options: sendEmailOptions) {
 	// create reusable transporter object using the default SMTP transport
 	let transporter = nodemailer.createTransport({
-		// host: process.env.SMTP_HOST,
-		// port: Number(process.env.SMTP_PORT),
-		service: 'Hotmail',
+		host: process.env.SMTP_HOST,
+		port: Number(process.env.SMTP_PORT),
 		auth: {
 			user: process.env.SMTP_EMAIL,
 			pass: process.env.SMTP_PASSWORD,
 		},
-		// tls: { secureProtocol: 'TLSv1_method', rejectUnauthorized: false },
-		// secure: false,
+		tls: { secureProtocol: 'TLSv1_method', rejectUnauthorized: false },
+		secure: false,
 		debug: true,
 	});
 
@@ -171,8 +170,8 @@ export async function sendEmail(options: sendEmailOptions) {
 		`,
 	};
 
-	if (options.cc) {
-		message.cc = options.cc;
+	if (options.bcc) {
+		message.bcc = options.bcc;
 	}
 
 	const info = await transporter.sendMail(message);
