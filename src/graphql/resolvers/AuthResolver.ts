@@ -26,8 +26,7 @@ export class AuthResolver {
 	@Mutation(() => Boolean)
 	async beginRegistration(
 		@Arg('input')
-		{ name, email, password }: AuthInput,
-		@Ctx() ctx: MyContext
+		{ name, email, password }: AuthInput
 	): Promise<Boolean> {
 		const user = await UserModel.findOne({ email });
 		if (user) {
@@ -42,9 +41,10 @@ export class AuthResolver {
 			}
 		);
 
-		const registrationUrl = `${ctx.req.protocol}://${
+		const registrationUrl = `${
 			process.env.FRONTEND_URL as string
 		}/register?token=${registrationToken}`;
+		console.log(registrationUrl);
 		try {
 			await sendEmail({
 				email: email,
@@ -166,10 +166,7 @@ export class AuthResolver {
 	// @desc	forgot password send email
 	// @access	Private
 	@Mutation(() => Boolean)
-	async forgotPassword(
-		@Arg('email') email: string,
-		@Ctx() ctx: MyContext
-	): Promise<Boolean> {
+	async forgotPassword(@Arg('email') email: string): Promise<Boolean> {
 		const user = await UserModel.findOne({ email: email });
 
 		if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
@@ -186,7 +183,7 @@ export class AuthResolver {
 		await user!.save({ validateBeforeSave: false });
 
 		// create reset url
-		const resetUrl = `${ctx.req.protocol}://${
+		const resetUrl = `${
 			process.env.FRONTEND_URL as string
 		}/resetpassword/?token=${resetToken}`;
 

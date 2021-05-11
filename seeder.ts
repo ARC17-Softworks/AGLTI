@@ -4,7 +4,7 @@ import 'colors';
 const dotenv = require('dotenv');
 
 // load env vars
-dotenv.config({ path: './config/config.env' });
+dotenv.config({ path: '.env' });
 
 // load models
 import { UserModel as User } from './src/entities/User';
