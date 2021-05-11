@@ -211,7 +211,8 @@ export class AuthResolver {
 	@UseMiddleware(protect)
 	async resetPassword(
 		@Arg('resettoken') resettoken: string,
-		@Arg('newPassword') newPassword: string
+		@Arg('newPassword') newPassword: string,
+		@Ctx() ctx: MyContext
 	): Promise<UserResponse> {
 		// get hashed token
 		const resetPasswordToken = crypto
@@ -234,6 +235,9 @@ export class AuthResolver {
 		user.resetPasswordExpire = undefined;
 
 		await user.save();
+
+		setTokenCookie(user, ctx.res);
+
 		return { user };
 	}
 
