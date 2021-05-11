@@ -50,8 +50,7 @@ export class AuthResolver {
 				email: email,
 				subject: 'Welcome to AGLTI | complete account registration',
 				title: `Welcome to AGLTI, ${name!.split(' ')[0]}!`,
-				body:
-					'to complete your registration please follow this link (link expires in 1 hour).',
+				body: 'to complete your registration please follow this link (link expires in 1 hour).',
 				link: registrationUrl,
 				linkName: 'Complete Registration',
 			});
@@ -185,15 +184,14 @@ export class AuthResolver {
 		// create reset url
 		const resetUrl = `${
 			process.env.FRONTEND_URL as string
-		}/resetpassword/?token=${resetToken}`;
+		}/resetpassword?token=${resetToken}`;
 
 		try {
 			await sendEmail({
 				email: user.email,
 				subject: 'AGLTI | reset password',
 				title: 'Reset you account password',
-				body:
-					'You are recieving this email because you (or someone else) has requested the reset of your AGLTI account password. (link expire in 10 minutes)',
+				body: 'You are recieving this email because you (or someone else) has requested the reset of your AGLTI account password. (link expire in 10 minutes)',
 				link: resetUrl,
 				linkName: 'Reset Password',
 			});
