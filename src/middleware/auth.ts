@@ -34,6 +34,7 @@ export const protect: MiddlewareFn<MyContext> = async ({ context }, next) => {
 		)) as User;
 	} catch (err) {
 		console.log(err);
+		context.res.clearCookie('token');
 		throw new AuthenticationError('Not authorised to access this resource');
 	}
 
