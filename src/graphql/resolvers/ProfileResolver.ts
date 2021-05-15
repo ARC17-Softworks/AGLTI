@@ -346,7 +346,9 @@ export class ProfileResolver {
 	async checkProfile(@Ctx() ctx: MyContext): Promise<ProfileResponse> {
 		const profile = await ProfileModel.findOne({
 			user: ctx.req.user!.id,
-		}).select('activeProject skills');
+		})
+			.select('activeProject skills')
+			.populate('activeProject', 'title');
 
 		if (!profile) {
 			return {};
