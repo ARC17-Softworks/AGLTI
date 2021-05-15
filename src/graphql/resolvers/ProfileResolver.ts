@@ -83,7 +83,7 @@ export class ProfileResolver {
 
 	@Query(() => ProfileResponse)
 	@UseMiddleware(protect)
-	async getMe(@Ctx() ctx: MyContext) {
+	async getMe(@Ctx() ctx: MyContext): Promise<ProfileResponse> {
 		const profile = await ProfileModel.findOne(
 			{ user: ctx.req.user!.id },
 			{ projects: { $slice: 5 } }
@@ -117,7 +117,7 @@ export class ProfileResolver {
 
 	@Query(() => ProfileResponse)
 	@UseMiddleware(protect)
-	async getProfile(@Arg('userId') userId: string) {
+	async getProfile(@Arg('userId') userId: string): Promise<ProfileResponse> {
 		const profile = await ProfileModel.findOne(
 			{ user: userId },
 			{ projects: { $slice: 5 } }
@@ -141,7 +141,7 @@ export class ProfileResolver {
 		@Arg('input')
 		{ page, limit }: PaginationInput,
 		@Ctx() ctx: MyContext
-	) {
+	): Promise<ProjectsResponse> {
 		if (!page) page = 1;
 		if (!limit) limit = 20;
 		const startIndex = (page - 1) * limit;
@@ -189,7 +189,7 @@ export class ProfileResolver {
 		@Arg('userId') userId: string,
 		@Arg('input')
 		{ page, limit }: PaginationInput
-	) {
+	): Promise<ProjectsResponse> {
 		if (!page) page = 1;
 		if (!limit) limit = 20;
 		const startIndex = (page - 1) * limit;
@@ -234,7 +234,7 @@ export class ProfileResolver {
 	async getGitHubRepos(
 		@Arg('username')
 		username: string
-	) {
+	): Promise<RepositoriesResponse> {
 		const url = 'https://api.github.com/graphql';
 		const query = `query {
 			user(login: "${username}") {
@@ -339,5 +339,19 @@ export class ProfileResolver {
 		profile.education.splice(removeIndex, 1);
 		await profile.save();
 		return true;
+	}
+
+	@Query(() => ProfileResponse)
+	@UseMiddleware(protect)
+	async checkProfile(@Ctx() ctx: MyContext): Promise<ProfileResponse> {
+		const profile = await ProfileModel.findOne({
+			user: ctx.req.user!.id,
+		}).select('activeProject skills');
+
+		if (!profile) {
+			return {};
+		}
+
+		return { profile };
 	}
 }

@@ -208,7 +208,6 @@ export class AuthResolver {
 	}
 
 	@Mutation(() => UserResponse)
-	@UseMiddleware(protect)
 	async resetPassword(
 		@Arg('resettoken') resettoken: string,
 		@Arg('newPassword') newPassword: string,

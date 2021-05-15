@@ -9,12 +9,13 @@ import { Schema } from 'mongoose';
 @pre<User>('save', async function (next) {
 	if (this.avatar) {
 		next();
+	} else {
+		const initials = this.name.split(' ');
+		const randomColor = Math.floor(Math.random() * 16777215).toString(16);
+		this.avatar = `https://ui-avatars.com/api/?name=${initials[0][0]}+${
+			initials.length > 1 ? initials[1][0] : ''
+		}&background=${randomColor}&color=fff&font-size=0.6&bold=true`;
 	}
-	const initials = this.name.split(' ');
-	const randomColor = Math.floor(Math.random() * 16777215).toString(16);
-	this.avatar = `https://ui-avatars.com/api/?name=${initials[0][0]}+${
-		initials.length > 1 ? initials[1][0] : ''
-	}&background=${randomColor}&color=fff&font-size=0.6&bold=true`;
 })
 // Encrypt password using bcrypt
 @pre<User>('save', async function (next) {
