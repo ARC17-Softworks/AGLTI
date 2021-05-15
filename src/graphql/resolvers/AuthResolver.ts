@@ -270,6 +270,42 @@ export class AuthResolver {
 
 		return true;
 	}
+
+	@Query(() => UserResponse)
+	async checkAuth(@Ctx() ctx: MyContext): Promise<UserResponse> {
+		if (
+			!ctx.req
+				.get('Cookie')
+				?.split('; ')
+				.filter((item) => item.startsWith('token=')).length
+		) {
+			return {};
+		}
+
+		const token = ctx.req
+			.get('Cookie')
+			?.split('; ')
+			.filter((item) => item.startsWith('token='))[0]
+			.split('=')[1];
+
+		try {
+			// verify token
+			const decoded = jwt.verify(
+				token!,
+				process.env.JWT_SECRET as string
+			) as User;
+
+			const user = (await UserModel.findById(decoded.id).select(
+				'id name avatar'
+			)) as User;
+
+			return { user };
+		} catch (err) {
+			console.log(err);
+			ctx.res.clearCookie('token');
+			return {};
+		}
+	}
 }
 
 // Get token from model & create cookie
