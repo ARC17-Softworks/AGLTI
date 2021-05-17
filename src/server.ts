@@ -3,6 +3,7 @@ import { buildSchema } from 'type-graphql';
 import express from 'express';
 import { db } from './services/db';
 import dotenv from 'dotenv';
+import ExpressMongoSanitize from 'express-mongo-sanitize';
 import 'colors';
 import 'reflect-metadata';
 // import './services/cache';
@@ -64,6 +65,12 @@ const main = async () => {
 	};
 
 	server.applyMiddleware({ app, cors: corsOptions });
+
+	app.use(
+		ExpressMongoSanitize({
+			replaceWith: '_',
+		})
+	);
 
 	app.listen(PORT, () =>
 		console.log(

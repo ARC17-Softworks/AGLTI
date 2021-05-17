@@ -23,14 +23,16 @@ import {
 
 @Resolver()
 export class ProfileResolver {
-	@Mutation(() => Boolean)
+	@Mutation(() => ProfileResponse)
 	@UseMiddleware(protect)
 	async setProfile(
 		@Arg('input')
 		{ name, bio, location, skills, links }: ProfileInput,
 		@Ctx() ctx: MyContext
-	): Promise<Boolean> {
-		let profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
+	): Promise<ProfileResponse> {
+		let profile = await ProfileModel.findOne({
+			user: ctx.req.user!.id,
+		}).populate('activeProject', 'title');
 		if (profile) {
 			if (bio) profile.bio = bio;
 			if (location) profile.location = location;
@@ -78,7 +80,7 @@ export class ProfileResolver {
 			}
 		}
 
-		return true;
+		return { profile };
 	}
 
 	@Query(() => ProfileResponse)

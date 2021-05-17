@@ -44,7 +44,6 @@ export class AuthResolver {
 		const registrationUrl = `${
 			process.env.FRONTEND_URL as string
 		}/register?token=${registrationToken}`;
-		console.log(registrationUrl);
 		try {
 			await sendEmail({
 				email: email,
