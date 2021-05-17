@@ -220,8 +220,8 @@ export class Profile {
 	@prop({ type: () => [Education] })
 	education?: Education[];
 
-	@Field(() => Links)
-	@prop({ type: () => Links })
+	@Field(() => Links, { nullable: true })
+	@prop({ type: () => Links, _id: false })
 	links?: Links;
 
 	@Field(() => Project, { nullable: true })
