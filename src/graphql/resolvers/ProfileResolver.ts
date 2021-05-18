@@ -342,20 +342,4 @@ export class ProfileResolver {
 		await profile.save();
 		return true;
 	}
-
-	@Query(() => ProfileResponse)
-	@UseMiddleware(protect)
-	async checkProfile(@Ctx() ctx: MyContext): Promise<ProfileResponse> {
-		const profile = await ProfileModel.findOne({
-			user: ctx.req.user!.id,
-		})
-			.select('activeProject skills')
-			.populate('activeProject', 'title');
-
-		if (!profile) {
-			return {};
-		}
-
-		return { profile };
-	}
 }

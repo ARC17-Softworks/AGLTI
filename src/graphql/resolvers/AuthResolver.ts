@@ -8,14 +8,14 @@ import {
 	UseMiddleware,
 } from 'type-graphql';
 import { User, UserModel } from '../../entities/User';
-import { AuthInput } from '../types/InputTypes';
+import { AuthInput, RegisterInput } from '../types/InputTypes';
 import { MyContext } from '../types/MyContext';
 import { sendEmail } from '../../utils/sendEmail';
 import { CookieOptions, Response } from 'express';
 import { DocumentType } from '@typegoose/typegoose';
 import { protect } from '../../middleware/auth';
 import { ApolloError, UserInputError } from 'apollo-server-express';
-import { UserResponse } from '../types/ResponseTypes';
+import { AuthResponse, UserResponse } from '../types/ResponseTypes';
 import crypto from 'crypto';
 import { ProfileModel } from '../../entities/Profile';
 
@@ -26,7 +26,7 @@ export class AuthResolver {
 	@Mutation(() => Boolean)
 	async beginRegistration(
 		@Arg('input')
-		{ name, email, password }: AuthInput
+		{ name, email, password }: RegisterInput
 	): Promise<Boolean> {
 		const user = await UserModel.findOne({ email });
 		if (user) {
@@ -70,7 +70,7 @@ export class AuthResolver {
 		@Ctx() ctx: MyContext
 	): Promise<UserResponse> {
 		const decoded = jwt.verify(webtoken, process.env.JWT_SECRET as string);
-		const { name, email, password } = decoded as AuthInput;
+		const { name, email, password } = decoded as RegisterInput;
 
 		let user = await UserModel.findOne({ email });
 		if (user) {
@@ -104,12 +104,12 @@ export class AuthResolver {
 
 	// @desc	login to account
 	// @access	Public
-	@Mutation(() => UserResponse)
+	@Mutation(() => AuthResponse)
 	async login(
 		@Arg('input')
 		{ email, password }: AuthInput,
 		@Ctx() ctx: MyContext
-	): Promise<UserResponse> {
+	): Promise<AuthResponse> {
 		// check for user
 		const user = await UserModel.findOne({ email }).select('+password');
 
@@ -124,9 +124,19 @@ export class AuthResolver {
 			throw new ApolloError('invalid credentials');
 		}
 
+		const profile = await ProfileModel.findOne({
+			user: user.id,
+		})
+			.select('activeProject skills')
+			.populate('activeProject', 'title');
+
 		setTokenCookie(user, ctx.res);
 
-		return { user };
+		if (!profile) {
+			return { user };
+		}
+
+		return { user, profile };
 	}
 
 	// @desc	logout of account
@@ -206,12 +216,12 @@ export class AuthResolver {
 		}
 	}
 
-	@Mutation(() => UserResponse)
+	@Mutation(() => AuthResponse)
 	async resetPassword(
 		@Arg('resettoken') resettoken: string,
 		@Arg('newPassword') newPassword: string,
 		@Ctx() ctx: MyContext
-	): Promise<UserResponse> {
+	): Promise<AuthResponse> {
 		// get hashed token
 		const resetPasswordToken = crypto
 			.createHash('sha256')
@@ -234,9 +244,19 @@ export class AuthResolver {
 
 		await user.save();
 
+		const profile = await ProfileModel.findOne({
+			user: user.id,
+		})
+			.select('activeProject skills')
+			.populate('activeProject', 'title');
+
 		setTokenCookie(user, ctx.res);
 
-		return { user };
+		if (!profile) {
+			return { user };
+		}
+
+		return { user, profile };
 	}
 
 	@Mutation(() => Boolean)
@@ -269,8 +289,8 @@ export class AuthResolver {
 		return true;
 	}
 
-	@Query(() => UserResponse)
-	async checkAuth(@Ctx() ctx: MyContext): Promise<UserResponse> {
+	@Query(() => AuthResponse)
+	async checkAuth(@Ctx() ctx: MyContext): Promise<AuthResponse> {
 		if (
 			!ctx.req
 				.get('Cookie')
@@ -297,7 +317,17 @@ export class AuthResolver {
 				'id name avatar'
 			)) as User;
 
-			return { user };
+			const profile = await ProfileModel.findOne({
+				user: user.id,
+			})
+				.select('activeProject skills')
+				.populate('activeProject', 'title');
+
+			if (!profile) {
+				return { user };
+			}
+
+			return { user, profile };
 		} catch (err) {
 			console.log(err);
 			ctx.res.clearCookie('token');

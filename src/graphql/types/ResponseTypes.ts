@@ -18,6 +18,15 @@ export class ProfileResponse {
 }
 
 @ObjectType()
+export class AuthResponse {
+	@Field(() => User, { nullable: true })
+	user?: User;
+
+	@Field(() => Profile, { nullable: true })
+	profile?: Profile;
+}
+
+@ObjectType()
 export class PagiantionPage {
 	@Field()
 	page?: number;

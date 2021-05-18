@@ -3,10 +3,21 @@ import { MinLength, IsEmail } from 'class-validator';
 import { Links } from '../../entities/Profile';
 
 @InputType()
-export class AuthInput {
-	@Field({ nullable: true })
+export class RegisterInput {
+	@Field()
 	name?: string;
 
+	@Field()
+	@IsEmail()
+	email!: string;
+
+	@Field()
+	@MinLength(6)
+	password!: string;
+}
+
+@InputType()
+export class AuthInput {
 	@Field()
 	@IsEmail()
 	email!: string;
