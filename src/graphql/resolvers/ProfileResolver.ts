@@ -30,13 +30,16 @@ export class ProfileResolver {
 		{ name, bio, location, skills, links }: ProfileInput,
 		@Ctx() ctx: MyContext
 	): Promise<ProfileResponse> {
+		if (skills.length === 0) {
+			throw new ApolloError('skills are required');
+		}
 		let profile = await ProfileModel.findOne({
 			user: ctx.req.user!.id,
 		}).populate('activeProject', 'title');
 		if (profile) {
+			profile.skills = skills;
 			if (bio) profile.bio = bio;
 			if (location) profile.location = location;
-			if (skills) profile.skills = skills;
 			if (links) {
 				if (links.youtube) profile.links!.youtube = links.youtube;
 				if (links.github) profile.links!.github = links.github;
