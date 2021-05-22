@@ -93,9 +93,24 @@ export class PositionsResponse {
 }
 
 @ObjectType()
+export class PrimaryLanguage {
+	@Field(() => String)
+	name!: string;
+}
+
+@ObjectType()
 export class Repository {
 	@Field(() => String)
 	name!: string;
+
+	@Field(() => String, { nullable: true })
+	description?: string;
+
+	@Field(() => String)
+	url!: string;
+
+	@Field(() => PrimaryLanguage, { nullable: true })
+	primaryLanguage?: PrimaryLanguage;
 }
 
 @ObjectType()

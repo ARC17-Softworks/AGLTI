@@ -242,7 +242,12 @@ export class ProfileResolver {
 			user(login: "${username}") {
 			  repositories(last:5){
 				nodes{
-				  name
+					name
+					description
+					url
+					primaryLanguage {
+						name
+					}
 				}
 			  }
 			  
