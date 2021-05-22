@@ -38,14 +38,14 @@ export class ProfileResolver {
 		}).populate('activeProject', 'title');
 		if (profile) {
 			profile.skills = skills;
-			if (bio) profile.bio = bio;
-			if (location) profile.location = location;
+			profile.bio = bio;
+			profile.location = location;
 			if (links) {
 				if (links.youtube) profile.links!.youtube = links.youtube;
-				if (links.github) profile.links!.github = links.github;
+				profile.links!.github = links.github;
 				if (links.hackerRank) profile.links!.hackerRank = links.hackerRank;
-				if (links.dribble) profile.links!.dribble = links.dribble;
-				if (links.linkedin) profile.links!.linkedin = links.linkedin;
+				profile.links!.dribble = links.dribble;
+				profile.links!.linkedin = links.linkedin;
 				if (links.behance) profile.links!.behance = links.behance;
 				if (links.vimeo) profile.links!.vimeo = links.vimeo;
 				if (links.website) profile.links!.website = links.website;
