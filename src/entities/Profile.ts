@@ -24,7 +24,7 @@ export class Projects {
 @ObjectType()
 @InputType('ExperienceInput')
 export class Experience {
-	@Field(() => ID)
+	@Field(() => ID, { nullable: true })
 	id?: string;
 
 	@Field()
@@ -51,7 +51,7 @@ export class Experience {
 @ObjectType()
 @InputType('EducationInput')
 export class Education {
-	@Field(() => ID)
+	@Field(() => ID, { nullable: true })
 	id?: string;
 
 	@Field()
