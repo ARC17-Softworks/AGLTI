@@ -66,7 +66,7 @@ export class Education {
 	@prop({ required: [true, 'Please add a start date'] })
 	from!: Date;
 
-	@Field()
+	@Field({ nullable: true })
 	@prop()
 	to?: Date;
 }
