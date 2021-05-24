@@ -41,6 +41,7 @@ export class ProfileResolver {
 			profile.bio = bio;
 			profile.location = location;
 			if (links) {
+				if (!profile.links) profile.links = {};
 				if (links.youtube) profile.links!.youtube = links.youtube;
 				profile.links!.github = links.github;
 				if (links.hackerRank) profile.links!.hackerRank = links.hackerRank;
@@ -53,6 +54,7 @@ export class ProfileResolver {
 			try {
 				await profile.save();
 			} catch (err) {
+				console.log(err);
 				throw new ApolloError('could not complete request');
 			}
 		} else {
