@@ -126,7 +126,7 @@ export class SearchResolver {
 
 		// pagination
 		page = page || 1;
-		limit = 20;
+		limit = limit || 20;
 		const startIndex = (page - 1) * limit;
 		const endIndex = page * limit;
 		const total = await PostionModel.countDocuments({
