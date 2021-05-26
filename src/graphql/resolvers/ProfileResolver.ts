@@ -104,11 +104,11 @@ export class ProfileResolver {
 			.populate('activeProject', 'title')
 			.populate({
 				path: 'offers.position',
-				populate: { path: 'project', select: 'title' },
+				populate: { path: 'project', select: 'id title' },
 			})
 			.populate({
 				path: 'applied.position',
-				populate: { path: 'project', select: 'title' },
+				populate: { path: 'project', select: 'id title' },
 			})
 			.populate('contacts.contact', 'id name avatar')
 			.populate('outgoingRequests.user', 'id name avatar')
