@@ -35,7 +35,11 @@ export class ProfileResolver {
 		}
 		let profile = await ProfileModel.findOne({
 			user: ctx.req.user!.id,
-		}).populate('activeProject', 'title');
+		}).populate({
+			path: 'activeProject',
+			select: 'title owner',
+			populate: { path: 'owner', select: 'id' },
+		});
 		if (profile) {
 			profile.skills = skills;
 			profile.bio = bio;

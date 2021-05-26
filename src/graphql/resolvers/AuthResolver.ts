@@ -128,7 +128,11 @@ export class AuthResolver {
 			user: user.id,
 		})
 			.select('activeProject skills')
-			.populate('activeProject', 'title');
+			.populate({
+				path: 'activeProject',
+				select: 'title owner',
+				populate: { path: 'owner', select: 'id' },
+			});
 
 		setTokenCookie(user, ctx.res);
 
@@ -248,7 +252,11 @@ export class AuthResolver {
 			user: user.id,
 		})
 			.select('activeProject skills')
-			.populate('activeProject', 'title');
+			.populate({
+				path: 'activeProject',
+				select: 'title owner',
+				populate: { path: 'owner', select: 'id' },
+			});
 
 		setTokenCookie(user, ctx.res);
 
@@ -321,7 +329,11 @@ export class AuthResolver {
 				user: user.id,
 			})
 				.select('activeProject skills')
-				.populate('activeProject', 'title');
+				.populate({
+					path: 'activeProject',
+					select: 'title owner',
+					populate: { path: 'owner', select: 'id' },
+				});
 
 			if (!profile) {
 				return { user };
