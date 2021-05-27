@@ -50,7 +50,7 @@ export class ProjectResolver {
 	}
 
 	@Query(() => ProjectResponse)
-	@UseMiddleware(protect, authorize('BOTH'))
+	@UseMiddleware(protect)
 	async getProject(
 		@Arg('projectId') projectId: string
 	): Promise<ProjectResponse> {
