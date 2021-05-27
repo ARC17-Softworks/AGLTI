@@ -24,22 +24,22 @@ export class ProjectResolver {
 		if (project!.owner!.toString() === ctx.req.user!.id.toString()) {
 			project = await ProjectModel.findById(ctx.req.project)
 				.select('-posts')
-				.populate('owner', 'name avatar')
-				.populate('members.dev', 'name avatar')
-				.populate('previousMembers.dev', 'name avatar')
+				.populate('owner', 'id name avatar')
+				.populate('members.dev', 'id name avatar')
+				.populate('previousMembers.dev', 'id name avatar')
 				.populate('openings.position')
-				.populate('applicants.dev', 'name avatar')
+				.populate('applicants.dev', 'id name avatar')
 				.populate('applicants.position')
-				.populate('offered.dev', 'name avatar')
+				.populate('offered.dev', 'id name avatar')
 				.populate('offered.position')
-				.populate('tasks.dev', 'name avatar');
+				.populate('tasks.dev', 'id name avatar');
 		} else {
 			project = await ProjectModel.findById(ctx.req.project)
 				.select('-posts -openings -applicants -offered')
-				.populate('owner', 'name avatar')
-				.populate('members.dev', 'name avatar')
-				.populate('previousMembers.dev', 'name avatar')
-				.populate('tasks.dev', 'name avatar');
+				.populate('owner', 'id name avatar')
+				.populate('members.dev', 'id name avatar')
+				.populate('previousMembers.dev', 'id name avatar')
+				.populate('tasks.dev', 'id name avatar');
 		}
 
 		if (!project) {
@@ -56,9 +56,9 @@ export class ProjectResolver {
 	): Promise<ProjectResponse> {
 		const project = await ProjectModel.findById(projectId)
 			.select('-posts -openings -applicants -offered -tasks')
-			.populate('owner', 'name avatar')
-			.populate('members.dev', 'name avatar')
-			.populate('previousMembers.dev', 'name avatar');
+			.populate('owner', 'id name avatar')
+			.populate('members.dev', 'id name avatar')
+			.populate('previousMembers.dev', 'id name avatar');
 
 		if (!project) {
 			throw new ApolloError(`Resource not found with id of ${projectId}`);
@@ -96,8 +96,8 @@ export class ProjectResolver {
 			(profileToReview.reviews!.length + 2);
 
 		profileToReview.reviews!.push({
-			proj: (ctx.req.project as unknown) as Ref<Project>,
-			reviewer: (ctx.req.user!.id as unknown) as Ref<User>,
+			proj: ctx.req.project as unknown as Ref<Project>,
+			reviewer: ctx.req.user!.id as unknown as Ref<User>,
 		});
 
 		await profileToReview.save();

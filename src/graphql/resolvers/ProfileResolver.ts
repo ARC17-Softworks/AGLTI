@@ -35,7 +35,11 @@ export class ProfileResolver {
 		}
 		let profile = await ProfileModel.findOne({
 			user: ctx.req.user!.id,
-		}).populate('activeProject', 'title');
+		}).populate({
+			path: 'activeProject',
+			select: 'title owner',
+			populate: { path: 'owner', select: 'id' },
+		});
 		if (profile) {
 			profile.skills = skills;
 			profile.bio = bio;
@@ -100,11 +104,11 @@ export class ProfileResolver {
 			.populate('activeProject', 'title')
 			.populate({
 				path: 'offers.position',
-				populate: { path: 'project', select: 'title' },
+				populate: { path: 'project', select: 'id title' },
 			})
 			.populate({
 				path: 'applied.position',
-				populate: { path: 'project', select: 'title' },
+				populate: { path: 'project', select: 'id title' },
 			})
 			.populate('contacts.contact', 'id name avatar')
 			.populate('outgoingRequests.user', 'id name avatar')
