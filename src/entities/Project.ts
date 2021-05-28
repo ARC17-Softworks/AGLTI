@@ -197,6 +197,13 @@ export class Project {
 	@prop({ type: () => [Offered], _id: false })
 	offered?: Offered[];
 
+	@Field(() => [String])
+	@prop({
+		type: () => [String],
+		default: ['TODO', 'DOING', 'DONE', 'COMPLETE'],
+	})
+	taskColumns?: string[];
+
 	@Field(() => [Task], { nullable: true })
 	@prop({ type: () => [Task] })
 	tasks?: Task[];
@@ -204,6 +211,10 @@ export class Project {
 	@Field(() => [Post], { nullable: true })
 	@prop({ type: () => [Post] })
 	posts?: Post[];
+
+	@Field()
+	@prop({ default: Date.now })
+	createdAt?: Date;
 }
 
 export const ProjectModel = getModelForClass(Project);
