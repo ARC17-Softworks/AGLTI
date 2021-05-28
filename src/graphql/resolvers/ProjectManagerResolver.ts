@@ -71,7 +71,6 @@ export class ProjectManagerResolver {
 			profile!.applied = [];
 			await profile!.save();
 		} catch (err) {
-			console.log(err.message);
 			throw new ApolloError(`project creation failed: ${err.message}`);
 		}
 		return true;
@@ -221,7 +220,7 @@ export class ProjectManagerResolver {
 		}
 
 		project!.tasks!.push({
-			dev: (userId as unknown) as Ref<User>,
+			dev: userId as unknown as Ref<User>,
 			title,
 			description,
 		});
@@ -238,10 +237,11 @@ export class ProjectManagerResolver {
 	): Promise<Boolean> {
 		const project = await ProjectModel.findById(ctx.req.project);
 
-		const task = ((((project!
-			.tasks as Task[]) as unknown) as Types.DocumentArray<
-			DocumentType<Project>
-		>).id(taskId) as unknown) as Task;
+		const task = (
+			project!.tasks as Task[] as unknown as Types.DocumentArray<
+				DocumentType<Project>
+			>
+		).id(taskId) as unknown as Task;
 
 		if (!task) {
 			throw new ApolloError('task not found');
@@ -270,10 +270,11 @@ export class ProjectManagerResolver {
 		@Ctx() ctx: MyContext
 	): Promise<Boolean> {
 		const project = await ProjectModel.findById(ctx.req.project);
-		const task = ((((project!
-			.tasks as Task[]) as unknown) as Types.DocumentArray<
-			DocumentType<Project>
-		>).id(taskId) as unknown) as Task;
+		const task = (
+			project!.tasks as Task[] as unknown as Types.DocumentArray<
+				DocumentType<Project>
+			>
+		).id(taskId) as unknown as Task;
 
 		if (!task) {
 			throw new ApolloError('task not found');
