@@ -71,8 +71,31 @@ export class ProjectManagerResolver {
 			profile!.applied = [];
 			await profile!.save();
 		} catch (err) {
-			console.log(err.message);
-			throw new ApolloError(`project creation failed: ${err.message}`);
+			throw new ApolloError(err.message);
+		}
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
+	async editProject(
+		@Arg('title') title: string,
+		@Arg('description') description: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+
+		if (!project) {
+			throw new ApolloError('project not found');
+		}
+
+		project.title = title;
+		project.description = description;
+		try {
+			await project.save();
+		} catch (err) {
+			console.log(err);
+			throw new ApolloError('could not complete request');
 		}
 		return true;
 	}
@@ -86,7 +109,7 @@ export class ProjectManagerResolver {
 		try {
 			const project = await ProjectModel.findById(ctx.req.project);
 
-			if (project!.openings!.length + project!.members!.length > 9) {
+			if (project!.openings!.length + project!.members!.length > 99) {
 				throw new ApolloError(
 					'developer limit reached cannot create any more positions'
 				);
@@ -221,7 +244,7 @@ export class ProjectManagerResolver {
 		}
 
 		project!.tasks!.push({
-			dev: (userId as unknown) as Ref<User>,
+			dev: userId as unknown as Ref<User>,
 			title,
 			description,
 		});
@@ -238,10 +261,11 @@ export class ProjectManagerResolver {
 	): Promise<Boolean> {
 		const project = await ProjectModel.findById(ctx.req.project);
 
-		const task = ((((project!
-			.tasks as Task[]) as unknown) as Types.DocumentArray<
-			DocumentType<Project>
-		>).id(taskId) as unknown) as Task;
+		const task = (
+			project!.tasks as Task[] as unknown as Types.DocumentArray<
+				DocumentType<Project>
+			>
+		).id(taskId) as unknown as Task;
 
 		if (!task) {
 			throw new ApolloError('task not found');
@@ -270,10 +294,11 @@ export class ProjectManagerResolver {
 		@Ctx() ctx: MyContext
 	): Promise<Boolean> {
 		const project = await ProjectModel.findById(ctx.req.project);
-		const task = ((((project!
-			.tasks as Task[]) as unknown) as Types.DocumentArray<
-			DocumentType<Project>
-		>).id(taskId) as unknown) as Task;
+		const task = (
+			project!.tasks as Task[] as unknown as Types.DocumentArray<
+				DocumentType<Project>
+			>
+		).id(taskId) as unknown as Task;
 
 		if (!task) {
 			throw new ApolloError('task not found');

@@ -100,8 +100,8 @@ export class ProfileResolver {
 			{ projects: { $slice: 5 } }
 		)
 			.populate('user', 'name avatar id')
-			.populate('projects.proj', 'title')
-			.populate('activeProject', 'title')
+			.populate('projects.proj', 'id title')
+			.populate('activeProject', 'id title')
 			.populate({
 				path: 'offers.position',
 				populate: { path: 'project', select: 'id title' },
@@ -137,8 +137,8 @@ export class ProfileResolver {
 				'-offers -applied -outgoingRequests -incomingRequests -contacts -blocked -messages -mentions'
 			)
 			.populate('user', 'name avatar id')
-			.populate('projects.proj', 'title')
-			.populate('activeProject', 'title');
+			.populate('projects.proj', 'id title')
+			.populate('activeProject', 'id title');
 		if (!profile) {
 			throw new ApolloError(`Resource not found with id of ${userId}`);
 		}
@@ -160,7 +160,7 @@ export class ProfileResolver {
 
 		const projects = await ProfileModel.findOne({ user: ctx.req.user!.id })
 			.select('projects')
-			.populate('projects.proj', 'title');
+			.populate('projects.proj', 'id title');
 		if (!projects) {
 			throw new ApolloError(
 				`Resource not found with id of ${ctx.req.user!.id}`
@@ -208,7 +208,7 @@ export class ProfileResolver {
 
 		const projects = await ProfileModel.findOne({ user: userId })
 			.select('projects')
-			.populate('projects.proj', 'title');
+			.populate('projects.proj', 'id title');
 		if (!projects) {
 			throw new ApolloError(`Resource not found with id of ${userId}`);
 		}
