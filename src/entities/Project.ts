@@ -71,7 +71,7 @@ export class Task {
 	@Field()
 	@prop({
 		trim: true,
-		minlength: 50,
+		minlength: [50, 'description should be at least 50 characters'],
 		required: [true, 'please add a description'],
 	})
 	description!: string;
