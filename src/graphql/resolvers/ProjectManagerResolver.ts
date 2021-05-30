@@ -94,7 +94,6 @@ export class ProjectManagerResolver {
 		try {
 			await project.save();
 		} catch (err) {
-			console.log(err);
 			throw new ApolloError('could not complete request');
 		}
 		return true;

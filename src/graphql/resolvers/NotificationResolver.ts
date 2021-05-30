@@ -118,6 +118,20 @@ export class NotificationResolver {
 			}
 
 			await project.save();
+		} else if (path === 'applicants') {
+			if (!project!) {
+				throw new ApolloError(`bad request`);
+			}
+
+			if (!(project.owner!.toString() === ctx.req.user!.id.toString())) {
+				throw new ApolloError(`bad request`);
+			}
+
+			for (const applicant of project!.applicants!) {
+				applicant.read = true;
+			}
+
+			await project.save();
 		} else if (path === 'mentions') {
 			if (!project!) {
 				throw new ApolloError(`bad request`);
