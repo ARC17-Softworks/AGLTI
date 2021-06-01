@@ -98,3 +98,21 @@ export class MentionInput {
 	@Field()
 	userId!: string;
 }
+
+@InputType()
+export class TaskInput {
+	@Field()
+	userId!: string;
+
+	@Field()
+	title!: string;
+
+	@Field()
+	description!: string;
+
+	@Field({ nullable: true })
+	startDate?: Date;
+
+	@Field({ nullable: true })
+	dueDate?: Date;
+}
