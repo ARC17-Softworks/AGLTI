@@ -5,7 +5,7 @@ import { PostionModel } from '../../entities/Position';
 import { ProfileModel } from '../../entities/Profile';
 import { Project, ProjectModel, Task } from '../../entities/Project';
 import { authorize, protect } from '../../middleware/auth';
-import { PositionInput } from '../types/InputTypes';
+import { PositionInput, TaskInput } from '../types/InputTypes';
 import { MyContext } from '../types/MyContext';
 import mongoose from 'mongoose';
 import { DocumentType, Ref } from '@typegoose/typegoose';
@@ -94,7 +94,6 @@ export class ProjectManagerResolver {
 		try {
 			await project.save();
 		} catch (err) {
-			console.log(err);
 			throw new ApolloError('could not complete request');
 		}
 		return true;
@@ -229,9 +228,7 @@ export class ProjectManagerResolver {
 	@Mutation(() => Boolean)
 	@UseMiddleware(protect, authorize('OWNER'))
 	async assignTask(
-		@Arg('userId') userId: string,
-		@Arg('title') title: string,
-		@Arg('description') description: string,
+		@Arg('input') { userId, title, description, startDate, dueDate }: TaskInput,
 		@Ctx() ctx: MyContext
 	): Promise<Boolean> {
 		const project = await ProjectModel.findById(ctx.req.project);
@@ -247,6 +244,8 @@ export class ProjectManagerResolver {
 			dev: userId as unknown as Ref<User>,
 			title,
 			description,
+			startDate,
+			dueDate,
 		});
 		await project!.save();
 		return true;

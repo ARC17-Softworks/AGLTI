@@ -110,11 +110,24 @@ export class NotificationResolver {
 			for (const task of project!.tasks!) {
 				if (
 					task.dev!.toString() === ctx.req.user!.id.toString() &&
-					task.status === 'TODO' &&
 					task.read === false
 				) {
 					task.read = true;
 				}
+			}
+
+			await project.save();
+		} else if (path === 'applicants') {
+			if (!project!) {
+				throw new ApolloError(`bad request`);
+			}
+
+			if (!(project.owner!.toString() === ctx.req.user!.id.toString())) {
+				throw new ApolloError(`bad request`);
+			}
+
+			for (const applicant of project!.applicants!) {
+				applicant.read = true;
 			}
 
 			await project.save();
