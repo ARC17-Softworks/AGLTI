@@ -30,9 +30,9 @@ export class ReportResolver {
 			await sendEmail({
 				email: process.env.REPORT_EMAIL as string,
 				bcc: [
-					process.env.REPORT_CC_ONE,
-					process.env.REPORT_CC_TWO,
+					process.env.REPORT_BCC_ONE,
 					process.env.REPORT_BCC_TWO,
+					process.env.REPORT_BCC_THREE,
 				] as string[],
 				subject: 'User Report',
 				title: 'User Reported',
@@ -73,7 +73,7 @@ export class ReportResolver {
 				bcc: [
 					process.env.REPORT_BCC_ONE,
 					process.env.REPORT_BCC_TWO,
-					process.env.REPORT_BCC_TWO,
+					process.env.REPORT_BCC_THREE,
 				] as string[],
 				subject: 'Project Report',
 				title: 'Project Report',

@@ -102,7 +102,7 @@ export class ProjectManagerResolver {
 	@Mutation(() => Boolean)
 	@UseMiddleware(protect, authorize('OWNER'))
 	async addPosition(
-		@Arg('input') { title, description, skills }: PositionInput,
+		@Arg('input') { title, description, skills, isPrivate }: PositionInput,
 		@Ctx() ctx: MyContext
 	): Promise<Boolean> {
 		try {
@@ -118,6 +118,7 @@ export class ProjectManagerResolver {
 				skills,
 				title,
 				description,
+				isPrivate,
 			});
 
 			project!.openings!.push({ position: position.id });

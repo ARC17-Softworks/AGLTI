@@ -64,6 +64,9 @@ export class PositionInput {
 
 	@Field()
 	description!: string;
+
+	@Field()
+	isPrivate!: boolean;
 }
 
 @InputType()
