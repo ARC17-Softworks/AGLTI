@@ -17,10 +17,11 @@ export class DeveloperResolver {
 	): Promise<Boolean> {
 		const project = await ProjectModel.findById(ctx.req.project);
 
-		const task = ((((project!
-			.tasks as Task[]) as unknown) as Types.DocumentArray<
-			DocumentType<Project>
-		>).id(taskId) as unknown) as Task;
+		const task = (
+			project!.tasks as Task[] as unknown as Types.DocumentArray<
+				DocumentType<Project>
+			>
+		).id(taskId) as unknown as Task;
 
 		if (!task) {
 			throw new ApolloError('task not found');
@@ -37,7 +38,6 @@ export class DeveloperResolver {
 			project!.tasks![taskIndex].read = true;
 		} else if (project!.tasks![taskIndex].status === 'DOING') {
 			project!.tasks![taskIndex].status = 'DONE';
-			project!.tasks![taskIndex].note = undefined;
 		}
 
 		await project!.save();

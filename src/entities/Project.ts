@@ -56,6 +56,20 @@ export class Offered {
 }
 
 @ObjectType()
+export class CheckListItem {
+	@Field(() => ID, { nullable: true })
+	id?: string;
+
+	@Field()
+	@prop({ trim: true, required: [true, 'please add your description'] })
+	description!: string;
+
+	@Field()
+	@prop({ default: false })
+	checked?: boolean;
+}
+
+@ObjectType()
 export class Task {
 	@Field(() => ID)
 	id?: string;
@@ -76,12 +90,9 @@ export class Task {
 	})
 	description!: string;
 
-	@Field({ nullable: true })
-	@prop({
-		trim: true,
-		minlength: 10,
-	})
-	note?: string;
+	@Field(() => [String])
+	@prop({ type: () => [String] })
+	labels?: string[];
 
 	@Field()
 	@prop({ enum: ['TODO', 'DOING', 'DONE', 'COMPLETE'], default: 'TODO' })
@@ -94,6 +105,14 @@ export class Task {
 	@Field({ nullable: true })
 	@prop()
 	dueDate?: Date;
+
+	@Field(() => [CheckListItem], { nullable: true })
+	@prop({ type: () => [CheckListItem] })
+	checkList?: CheckListItem[];
+
+	@Field(() => [Comment], { nullable: true })
+	@prop({ type: () => [Comment] })
+	comments?: Comment[];
 
 	@Field()
 	@prop({ default: false })
@@ -203,6 +222,13 @@ export class Project {
 		default: ['TODO', 'DOING', 'DONE', 'COMPLETE'],
 	})
 	taskColumns?: string[];
+
+	@Field(() => [String])
+	@prop({
+		type: () => [String],
+		default: ['URGENT', 'BUG FIX', 'BLOCKER', 'ON HOLD'],
+	})
+	taskLabels?: string[];
 
 	@Field(() => [Task], { nullable: true })
 	@prop({ type: () => [Task] })
