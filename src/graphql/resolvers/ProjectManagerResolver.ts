@@ -248,6 +248,23 @@ export class ProjectManagerResolver {
 
 	@Mutation(() => Boolean)
 	@UseMiddleware(protect, authorize('OWNER'))
+	async deleteLabel(
+		@Arg('label') label: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+		if (!project!.taskLabels!.includes(label)) {
+			throw new ApolloError('label does not exists');
+		}
+
+		const removeIndex = project!.taskLabels!.findIndex((l) => l === label);
+		project!.taskLabels!.splice(removeIndex, 1);
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
 	async assignTask(
 		@Arg('input') { userId, title, description, startDate, dueDate }: TaskInput,
 		@Ctx() ctx: MyContext
