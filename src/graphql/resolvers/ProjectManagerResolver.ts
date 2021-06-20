@@ -254,6 +254,36 @@ export class ProjectManagerResolver {
 
 	@Mutation(() => Boolean)
 	@UseMiddleware(protect, authorize('OWNER'))
+	async editTask(
+		@Arg('taskId') taskId: string,
+		@Arg('input') { userId, title, description, startDate, dueDate }: TaskInput,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+		const task = (
+			project!.tasks as Task[] as unknown as Types.DocumentArray<
+				DocumentType<Project>
+			>
+		).id(taskId) as unknown as Task;
+
+		if (!task) {
+			throw new ApolloError('task not found');
+		}
+
+		const taskIndex = project!.tasks!.findIndex((t) => t === task);
+
+		project!.tasks![taskIndex].dev = userId as unknown as Ref<User>;
+		project!.tasks![taskIndex].title = title;
+		project!.tasks![taskIndex].description = description;
+		project!.tasks![taskIndex].startDate = startDate;
+		project!.tasks![taskIndex].dueDate = dueDate;
+
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
 	async closeTask(
 		@Arg('taskId') taskId: string,
 		@Ctx() ctx: MyContext
