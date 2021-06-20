@@ -228,6 +228,26 @@ export class ProjectManagerResolver {
 
 	@Mutation(() => Boolean)
 	@UseMiddleware(protect, authorize('OWNER'))
+	async addLabel(
+		@Arg('label') label: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+		if (!label.length) {
+			throw new ApolloError('label can not be empty');
+		}
+		if (project!.taskLabels!.includes(label)) {
+			throw new ApolloError('label already exists');
+		}
+
+		label = label.toUpperCase().trim();
+		project!.taskLabels!.push(label);
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
 	async assignTask(
 		@Arg('input') { userId, title, description, startDate, dueDate }: TaskInput,
 		@Ctx() ctx: MyContext
