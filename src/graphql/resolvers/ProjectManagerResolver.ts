@@ -284,6 +284,33 @@ export class ProjectManagerResolver {
 
 	@Mutation(() => Boolean)
 	@UseMiddleware(protect, authorize('OWNER'))
+	async deleteTask(
+		@Arg('taskId') taskId: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+		const task = (
+			project!.tasks as Task[] as unknown as Types.DocumentArray<
+				DocumentType<Project>
+			>
+		).id(taskId) as unknown as Task;
+
+		if (!task) {
+			throw new ApolloError('task not found');
+		}
+		if (task.status === 'COMPLETE') {
+			throw new ApolloError('can not delete completed task');
+		}
+
+		const removeIndex = project!.tasks!.findIndex((t) => t === task);
+
+		project!.tasks!.splice(removeIndex, 1);
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
 	async closeTask(
 		@Arg('taskId') taskId: string,
 		@Ctx() ctx: MyContext
