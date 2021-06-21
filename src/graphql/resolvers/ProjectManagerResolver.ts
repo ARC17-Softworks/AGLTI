@@ -291,6 +291,32 @@ export class ProjectManagerResolver {
 
 	@Mutation(() => Boolean)
 	@UseMiddleware(protect, authorize('OWNER'))
+	async setTaskLabels(
+		@Arg('taskId') taskId: string,
+		@Arg('labels', () => [String], { nullable: 'items' }) labels: string[],
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+		const task = (
+			project!.tasks as Task[] as unknown as Types.DocumentArray<
+				DocumentType<Project>
+			>
+		).id(taskId) as unknown as Task;
+
+		if (!task) {
+			throw new ApolloError('task not found');
+		}
+
+		const taskIndex = project!.tasks!.findIndex((t) => t === task);
+
+		project!.tasks![taskIndex].labels = labels;
+
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
 	async editTask(
 		@Arg('taskId') taskId: string,
 		@Arg('input') { userId, title, description, startDate, dueDate }: TaskInput,
