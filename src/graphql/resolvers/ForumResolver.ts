@@ -51,6 +51,42 @@ export class ForumResolver {
 
 	@Mutation(() => Boolean)
 	@UseMiddleware(protect, authorize('BOTH'))
+	async editPost(
+		@Arg('postId') postId: string,
+		@Arg('text') text: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+
+		const editpost = (
+			project!.posts! as Post[] as unknown as Types.DocumentArray<
+				DocumentType<Project>
+			>
+		).id(postId) as unknown as Post;
+
+		if (!editpost) {
+			throw new ApolloError(`Resource not found with id of ${postId}`);
+		}
+
+		// only user who posted can edit posts
+		if (editpost!.user!.toString() != ctx.req.user!.id.toString()) {
+			throw new ApolloError('Not authorised to access this resource');
+		}
+
+		const postIndex = project!.posts!.findIndex(
+			(post) => post.id!.toString() === postId.toString()
+		);
+
+		project!.posts![postIndex].text = text;
+		project!.posts![postIndex].edited = true;
+		project!.posts![postIndex].date = new Date();
+
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('BOTH'))
 	async deletePost(
 		@Arg('postId') postId: string,
 		@Ctx() ctx: MyContext
