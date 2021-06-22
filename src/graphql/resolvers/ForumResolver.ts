@@ -289,6 +289,57 @@ export class ForumResolver {
 
 	@Mutation(() => Boolean)
 	@UseMiddleware(protect, authorize('BOTH'))
+	async editTaskComment(
+		@Arg('taskId') taskId: string,
+		@Arg('commentId') commentId: string,
+		@Arg('text') text: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+
+		const edittask = (
+			project!.tasks! as Task[] as unknown as Types.DocumentArray<
+				DocumentType<Project>
+			>
+		).id(taskId) as unknown as Task;
+
+		if (!edittask) {
+			throw new ApolloError(`Resource not found with id of ${taskId}`);
+		}
+
+		const editcomment = (
+			edittask.comments! as Comment[] as unknown as Types.DocumentArray<
+				DocumentType<Project>
+			>
+		).id(commentId) as unknown as Comment;
+
+		if (!editcomment) {
+			throw new ApolloError(`Resource not found with id of ${commentId}`);
+		}
+
+		// only user who posted can edit tasks
+		if (editcomment!.user!.toString() != ctx.req.user!.id.toString()) {
+			throw new ApolloError('Not authorised to access this resource');
+		}
+
+		const taskIndex = project!.tasks!.findIndex(
+			(post) => post.id!.toString() === taskId.toString()
+		);
+
+		const commentIndex = project!.tasks![taskIndex].comments!.findIndex(
+			(comment) => comment.id!.toString() === commentId.toString()
+		);
+
+		project!.tasks![taskIndex].comments![commentIndex].text = text;
+		project!.tasks![taskIndex].comments![commentIndex].edited = true;
+		project!.tasks![taskIndex].comments![commentIndex].date = new Date();
+
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('BOTH'))
 	async deleteTaskComment(
 		@Arg('taskId') taskId: string,
 		@Arg('commentId') commentId: string,
