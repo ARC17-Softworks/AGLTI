@@ -333,6 +333,10 @@ export class ProjectManagerResolver {
 			throw new ApolloError('task not found');
 		}
 
+		if (description.length < 3) {
+			throw new ApolloError('please enter description');
+		}
+
 		const taskIndex = project!.tasks!.findIndex((t) => t === task);
 
 		project!.tasks![taskIndex].checkList!.push({ description });
