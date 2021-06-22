@@ -200,6 +200,58 @@ export class ForumResolver {
 		return true;
 	}
 
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('BOTH'))
+	async deleteTaskComment(
+		@Arg('taskId') taskId: string,
+		@Arg('commentId') commentId: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+
+		const delTask = (
+			project!.tasks! as Task[] as unknown as Types.DocumentArray<
+				DocumentType<Project>
+			>
+		).id(taskId) as unknown as Task;
+
+		if (!delTask) {
+			throw new ApolloError(`Resource not found with id of ${taskId}`);
+		}
+
+		const delcomment = (
+			delTask.comments! as Comment[] as unknown as Types.DocumentArray<
+				DocumentType<Project>
+			>
+		).id(commentId) as unknown as Comment;
+
+		if (!delcomment) {
+			throw new ApolloError(`Resource not found with id of ${commentId}`);
+		}
+
+		// only user who posted comment or project manager can delete comment
+		if (
+			delcomment!.user!.toString() != ctx.req.user!.id.toString() &&
+			project!.owner!.toString() != ctx.req.user!.id.toString()
+		) {
+			throw new ApolloError('Not authorised to access this resource');
+		}
+
+		const taskIndex = project!.tasks!.findIndex(
+			(post) => post.id!.toString() === taskId.toString()
+		);
+
+		project!.tasks![taskIndex].comments = project!.tasks![
+			taskIndex
+		].comments!.filter(
+			(comment) => comment.id!.toString() != delcomment.id!.toString()
+		);
+
+		await project!.save();
+
+		return true;
+	}
+
 	@Query(() => PostsResponse)
 	@UseMiddleware(protect, authorize('BOTH'))
 	async getPosts(
