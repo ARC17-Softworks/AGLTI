@@ -11,7 +11,13 @@ import {
 	UseMiddleware,
 } from 'type-graphql';
 import { Mention, ProfileModel } from '../../entities/Profile';
-import { Comment, Post, Project, ProjectModel } from '../../entities/Project';
+import {
+	Comment,
+	Post,
+	Project,
+	ProjectModel,
+	Task,
+} from '../../entities/Project';
 import { User } from '../../entities/User';
 import { authorize, protect } from '../../middleware/auth';
 import { MentionInput, PaginationInput, PostInput } from '../types/InputTypes';
@@ -172,20 +178,20 @@ export class ForumResolver {
 	): Promise<Boolean> {
 		const project = await ProjectModel.findById(ctx.req.project);
 
-		const commpost = (
-			project!.posts! as Post[] as unknown as Types.DocumentArray<
+		const commTask = (
+			project!.tasks! as Task[] as unknown as Types.DocumentArray<
 				DocumentType<Project>
 			>
-		).id(taskId) as unknown as Post;
+		).id(taskId) as unknown as Task;
 
-		if (!commpost) {
+		if (!commTask) {
 			throw new ApolloError(`Resource not found with id of ${taskId}`);
 		}
 
-		const postIndex = project!.posts!.findIndex(
+		const taskIndex = project!.tasks!.findIndex(
 			(post) => post.id!.toString() === taskId.toString()
 		);
-		project!.posts![postIndex].comments!.push({
+		project!.tasks![taskIndex].comments!.push({
 			user: ctx.req.user!.id as unknown as Ref<User>,
 			text,
 		});
