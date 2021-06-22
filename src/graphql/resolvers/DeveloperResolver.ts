@@ -46,6 +46,41 @@ export class DeveloperResolver {
 
 	@Mutation(() => Boolean)
 	@UseMiddleware(protect, authorize('MEMBER'))
+	async checkCheckListItem(
+		@Arg('taskId') taskId: string,
+		@Arg('checklistId') checklistId: string,
+		@Arg('checkState') checkState: boolean,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+
+		const task = (
+			project!.tasks as Task[] as unknown as Types.DocumentArray<
+				DocumentType<Project>
+			>
+		).id(taskId) as unknown as Task;
+
+		if (!task) {
+			throw new ApolloError('task not found');
+		}
+
+		if (task.dev!.toString() != ctx.req.user!.id.toString()) {
+			throw new ApolloError('task does not belong to user');
+		}
+
+		const taskIndex = project!.tasks!.findIndex((t) => t === task);
+		const checkListIndex = project!.tasks![taskIndex].checkList!.findIndex(
+			(cl) => cl.id === checklistId
+		);
+
+		project!.tasks![taskIndex].checkList![checkListIndex].checked = checkState;
+
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('MEMBER'))
 	async leaveProject(@Ctx() ctx: MyContext): Promise<Boolean> {
 		const project = await ProjectModel.findById(ctx.req.project);
 		const profile = await ProfileModel.findOne({ user: ctx.req.user!.id });
