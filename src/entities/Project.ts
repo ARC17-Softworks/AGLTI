@@ -136,6 +136,10 @@ export class Comment {
 	text!: string;
 
 	@Field()
+	@prop({ default: false })
+	edited?: boolean;
+
+	@Field()
 	@prop({ default: Date.now })
 	date?: Date;
 }
@@ -156,10 +160,14 @@ export class Post {
 	@Field()
 	@prop({
 		trim: true,
-		minlength: 50,
+		minlength: 20,
 		required: [true, 'please add a post body'],
 	})
 	text!: string;
+
+	@Field()
+	@prop({ default: false })
+	edited?: boolean;
 
 	@Field(() => [Comment], { nullable: true })
 	@prop({ type: () => [Comment] })
