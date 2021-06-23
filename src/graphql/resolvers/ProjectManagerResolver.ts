@@ -462,6 +462,31 @@ export class ProjectManagerResolver {
 
 	@Mutation(() => Boolean)
 	@UseMiddleware(protect, authorize('OWNER'))
+	async addColumn(
+		@Arg('column') column: string,
+		@Arg('columnPos') columnPos: number,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+
+		column = column.toUpperCase();
+
+		if (project!.taskColumns!.includes(column)) {
+			throw new ApolloError('column already exists');
+		}
+
+		if (columnPos > project!.taskColumns!.length - 2) {
+			throw new ApolloError('invalid position');
+		}
+
+		project!.taskColumns!.splice(columnPos, 0, column);
+
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
 	async moveColumn(
 		@Arg('column') column: string,
 		@Arg('columnPos') columnPos: number,
