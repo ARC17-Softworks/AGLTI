@@ -449,8 +449,8 @@ export class ProjectManagerResolver {
 		if (!task) {
 			throw new ApolloError('task not found');
 		}
-		if (task.status != 'DONE') {
-			throw new ApolloError('task not done can not close');
+		if (task.checkList!.some((item) => item.checked === false)) {
+			throw new ApolloError('task checklist not complete can not close');
 		}
 
 		const taskIndex = project!.tasks!.findIndex((t) => t === task);
