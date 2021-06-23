@@ -11,8 +11,9 @@ import { ProfileModel } from '../../entities/Profile';
 export class DeveloperResolver {
 	@Mutation(() => Boolean)
 	@UseMiddleware(protect, authorize('MEMBER'))
-	async pushTask(
+	async moveTask(
 		@Arg('taskId') taskId: string,
+		@Arg('column') column: string,
 		@Ctx() ctx: MyContext
 	): Promise<Boolean> {
 		const project = await ProjectModel.findById(ctx.req.project);
@@ -31,14 +32,13 @@ export class DeveloperResolver {
 			throw new ApolloError('task does not belong to user');
 		}
 
+		if (column === 'COMPLETE') {
+			throw new ApolloError('Not Authorized');
+		}
+
 		const taskIndex = project!.tasks!.findIndex((t) => t === task);
 
-		if (project!.tasks![taskIndex].status === 'TODO') {
-			project!.tasks![taskIndex].status = 'DOING';
-			project!.tasks![taskIndex].read = true;
-		} else if (project!.tasks![taskIndex].status === 'DOING') {
-			project!.tasks![taskIndex].status = 'DONE';
-		}
+		project!.tasks![taskIndex].status = column;
 
 		await project!.save();
 		return true;
