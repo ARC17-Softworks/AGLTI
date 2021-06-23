@@ -157,7 +157,7 @@ export class Task {
 	@prop({ enum: ['TODO', 'DOING', 'DONE', 'COMPLETE'], default: 'TODO' })
 	status?: string;
 
-	@Field()
+	@Field({ nullable: true })
 	@prop({ default: Date.now })
 	startDate?: Date;
 
