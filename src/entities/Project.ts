@@ -119,6 +119,10 @@ export class Post {
 	@prop({ default: false })
 	edited?: boolean;
 
+	@Field()
+	@prop({ default: 0 })
+	commentCount?: number;
+
 	@Field(() => [Comment], { nullable: true })
 	@prop({ type: () => [Comment] })
 	comments?: Comment[];
