@@ -462,6 +462,32 @@ export class ProjectManagerResolver {
 
 	@Mutation(() => Boolean)
 	@UseMiddleware(protect, authorize('OWNER'))
+	async moveColumn(
+		@Arg('column') column: string,
+		@Arg('columnPos') columnPos: number,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+
+		if (!project!.taskColumns!.includes(column)) {
+			throw new ApolloError('column not found');
+		}
+
+		if (columnPos > project!.taskColumns!.length - 2) {
+			throw new ApolloError('invalid position');
+		}
+
+		const columnDelIndex = project!.taskColumns!.findIndex((c) => c === column);
+
+		project!.taskColumns!.splice(columnDelIndex, 1);
+		project!.taskColumns!.splice(columnPos, 0, column);
+
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
 	async deleteColumn(
 		@Arg('column') column: string,
 		@Arg('deleteTasks') deleteTasks: boolean,
