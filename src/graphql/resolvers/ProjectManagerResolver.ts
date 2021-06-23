@@ -524,6 +524,11 @@ export class ProjectManagerResolver {
 		if (!project!.taskColumns!.includes(column)) {
 			throw new ApolloError('column not found');
 		}
+
+		if (column === 'COMPLETE' || column === 'TODO') {
+			throw new ApolloError('can not delete this column');
+		}
+
 		if (deleteTasks) {
 			project!.tasks = project!.tasks!.filter((task) => task.status !== column);
 			project!.taskColumns = project!.taskColumns!.filter((c) => c !== column);
