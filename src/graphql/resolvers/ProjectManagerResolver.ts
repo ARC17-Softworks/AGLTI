@@ -462,6 +462,39 @@ export class ProjectManagerResolver {
 
 	@Mutation(() => Boolean)
 	@UseMiddleware(protect, authorize('OWNER'))
+	async deleteColumn(
+		@Arg('column') column: string,
+		@Arg('deleteTasks') deleteTasks: boolean,
+		@Arg('shiftColumn', { nullable: true }) shiftColumn: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+
+		if (!project!.taskColumns!.includes(column)) {
+			throw new ApolloError('column not found');
+		}
+		if (deleteTasks) {
+			project!.tasks = project!.tasks!.filter((task) => task.status !== column);
+			project!.taskColumns = project!.taskColumns!.filter((c) => c !== column);
+		} else {
+			if (!project!.taskColumns!.includes(shiftColumn)) {
+				throw new ApolloError('column not found');
+			}
+
+			for (const task of project!.tasks!) {
+				if (task.status === column) {
+					task.status = shiftColumn;
+				}
+			}
+
+			project!.taskColumns = project!.taskColumns!.filter((c) => c !== column);
+		}
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
 	async removeDeveloper(
 		@Arg('userId') userId: string,
 		@Ctx() ctx: MyContext
