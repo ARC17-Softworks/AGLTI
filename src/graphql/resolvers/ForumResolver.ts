@@ -146,8 +146,11 @@ export class ForumResolver {
 			text,
 		});
 
+		// move post to top
 		project!.posts!.splice(postIndex, 1);
 		project!.posts!.unshift(commpost);
+
+		project!.posts![postIndex].commentCount! += 1;
 
 		await project!.save();
 		return true;
@@ -250,6 +253,8 @@ export class ForumResolver {
 		].comments!.filter(
 			(comment) => comment.id!.toString() != delcomment.id!.toString()
 		);
+
+		project!.posts![postIndex].commentCount! -= 1;
 
 		await project!.save();
 
