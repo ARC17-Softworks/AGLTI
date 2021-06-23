@@ -70,56 +70,6 @@ export class CheckListItem {
 }
 
 @ObjectType()
-export class Task {
-	@Field(() => ID)
-	id?: string;
-
-	@Field(() => User)
-	@prop({ type: () => User, ref: () => User, required: true })
-	dev!: Ref<User>;
-
-	@Field()
-	@prop({ trim: true, required: [true, 'please add a title'] })
-	title!: string;
-
-	@Field()
-	@prop({
-		trim: true,
-		minlength: [20, 'description should be at least 50 characters'],
-		required: [true, 'please add a description'],
-	})
-	description!: string;
-
-	@Field(() => [String])
-	@prop({ type: () => [String] })
-	labels?: string[];
-
-	@Field()
-	@prop({ enum: ['TODO', 'DOING', 'DONE', 'COMPLETE'], default: 'TODO' })
-	status?: string;
-
-	@Field()
-	@prop({ default: Date.now })
-	startDate?: Date;
-
-	@Field({ nullable: true })
-	@prop()
-	dueDate?: Date;
-
-	@Field(() => [CheckListItem], { nullable: true })
-	@prop({ type: () => [CheckListItem] })
-	checkList?: CheckListItem[];
-
-	@Field(() => [Comment], { nullable: true })
-	@prop({ type: () => [Comment] })
-	comments?: Comment[];
-
-	@Field()
-	@prop({ default: false })
-	read?: boolean;
-}
-
-@ObjectType()
 export class Comment {
 	@Field(() => ID)
 	id?: string;
@@ -176,6 +126,56 @@ export class Post {
 	@Field()
 	@prop({ default: Date.now })
 	date?: Date;
+}
+
+@ObjectType()
+export class Task {
+	@Field(() => ID)
+	id?: string;
+
+	@Field(() => User)
+	@prop({ type: () => User, ref: () => User, required: true })
+	dev!: Ref<User>;
+
+	@Field()
+	@prop({ trim: true, required: [true, 'please add a title'] })
+	title!: string;
+
+	@Field()
+	@prop({
+		trim: true,
+		minlength: [20, 'description should be at least 50 characters'],
+		required: [true, 'please add a description'],
+	})
+	description!: string;
+
+	@Field(() => [String])
+	@prop({ type: () => [String] })
+	labels?: string[];
+
+	@Field()
+	@prop({ enum: ['TODO', 'DOING', 'DONE', 'COMPLETE'], default: 'TODO' })
+	status?: string;
+
+	@Field()
+	@prop({ default: Date.now })
+	startDate?: Date;
+
+	@Field({ nullable: true })
+	@prop()
+	dueDate?: Date;
+
+	@Field(() => [CheckListItem], { nullable: true })
+	@prop({ type: () => [CheckListItem] })
+	checkList?: CheckListItem[];
+
+	@Field(() => [Comment], { nullable: true })
+	@prop({ type: () => [Comment] })
+	comments?: Comment[];
+
+	@Field()
+	@prop({ default: false })
+	read?: boolean;
 }
 
 @ObjectType()
