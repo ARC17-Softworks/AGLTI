@@ -57,6 +57,7 @@ const main = async () => {
 			validate: true,
 		}),
 		context: ({ req, res }) => ({ req, res }),
+		uploads: false,
 	});
 
 	const corsOptions = {

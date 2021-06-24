@@ -146,11 +146,11 @@ export class ForumResolver {
 			text,
 		});
 
+		project!.posts![postIndex].commentCount! += 1;
+
 		// move post to top
 		project!.posts!.splice(postIndex, 1);
 		project!.posts!.unshift(commpost);
-
-		project!.posts![postIndex].commentCount! += 1;
 
 		await project!.save();
 		return true;
@@ -401,12 +401,13 @@ export class ForumResolver {
 		@Arg('input')
 		{ page, limit }: PaginationInput,
 		@Ctx() ctx: MyContext
-	) {
+	): Promise<PostsResponse> {
 		const project = await ProjectModel.findById(ctx.req.project)
 			.select(
-				'-_id -__v -owner -title -description -closed -openings -members -previousMembers -applicants -offered -tasks -posts.comments'
+				'-_id -__v -owner -title -description -closed -openings -previousMembers -applicants -offered -tasks -posts.comments'
 			)
-			.populate('posts.user', 'id name avatar');
+			.populate('posts.user', 'id name avatar')
+			.populate('members.dev', 'id');
 
 		let posts = project!.posts as Post[];
 
@@ -445,7 +446,7 @@ export class ForumResolver {
 		pagination.total = total;
 		pagination.count = posts.length;
 
-		return { posts, pagination };
+		return { posts, members: project!.members!, pagination };
 	}
 
 	@Query(() => PostResponse)
@@ -454,11 +455,12 @@ export class ForumResolver {
 		@Arg('postId')
 		postId: string,
 		@Ctx() ctx: MyContext
-	) {
+	): Promise<PostResponse> {
 		let project = await ProjectModel.findById(ctx.req.project)
-			.select('posts')
+			.select('posts members')
 			.populate('posts.user', 'id name avatar')
-			.populate('posts.comments.user', 'id name avatar');
+			.populate('posts.comments.user', 'id name avatar')
+			.populate('members.dev', 'id');
 		const post = (
 			project!.posts! as Post[] as unknown as Types.DocumentArray<
 				DocumentType<Project>
@@ -469,7 +471,7 @@ export class ForumResolver {
 			throw new ApolloError(`Resource not found with id of ${postId}`);
 		}
 
-		return { post };
+		return { post, members: project!.members! };
 	}
 
 	@Query(() => CommentResponse)
