@@ -475,7 +475,7 @@ export class ProjectManagerResolver {
 			throw new ApolloError('column already exists');
 		}
 
-		if (columnPos > project!.taskColumns!.length - 2) {
+		if (columnPos > project!.taskColumns!.length - 1) {
 			throw new ApolloError('invalid position');
 		}
 
@@ -498,7 +498,7 @@ export class ProjectManagerResolver {
 			throw new ApolloError('column not found');
 		}
 
-		if (columnPos > project!.taskColumns!.length - 2) {
+		if (columnPos > project!.taskColumns!.length - 1) {
 			throw new ApolloError('invalid position');
 		}
 
