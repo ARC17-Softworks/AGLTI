@@ -2,7 +2,7 @@ import { ObjectType, Field } from 'type-graphql';
 import { MessageThread } from '../../entities/MessageThread';
 import { Position } from '../../entities/Position';
 import { Profile, Projects } from '../../entities/Profile';
-import { Comment, Post, Project } from '../../entities/Project';
+import { Comment, Member, Post, Project } from '../../entities/Project';
 import { User } from '../../entities/User';
 
 @ObjectType()
@@ -124,6 +124,9 @@ export class PostsResponse {
 	@Field(() => [Post], { nullable: true })
 	posts?: Post[];
 
+	@Field(() => [Member], { nullable: true })
+	members?: Member[];
+
 	@Field(() => Pagiantion, { nullable: true })
 	pagination?: Pagiantion;
 }
@@ -132,6 +135,9 @@ export class PostsResponse {
 export class PostResponse {
 	@Field(() => Post, { nullable: true })
 	post?: Post;
+
+	@Field(() => [Member], { nullable: true })
+	members?: Member[];
 }
 
 @ObjectType()

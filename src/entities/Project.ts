@@ -15,7 +15,7 @@ class Opening {
 }
 
 @ObjectType()
-class Member {
+export class Member {
 	@Field(() => User)
 	@prop({ type: () => User, ref: () => User, required: true })
 	dev!: Ref<User>;
