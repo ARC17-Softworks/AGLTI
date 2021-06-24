@@ -158,7 +158,7 @@ export class Task {
 	labels?: string[];
 
 	@Field()
-	@prop({ enum: ['TODO', 'DOING', 'DONE', 'COMPLETE'], default: 'TODO' })
+	@prop({ default: 'TODO' })
 	status?: string;
 
 	@Field({ nullable: true })
