@@ -12,6 +12,10 @@ export class Position {
 	project!: Ref<Project>;
 
 	@Field()
+	@prop({ default: false })
+	isPrivate?: boolean;
+
+	@Field()
 	@prop({
 		trim: true,
 		required: [true, 'title is required'],

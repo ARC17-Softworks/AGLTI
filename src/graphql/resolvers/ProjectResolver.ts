@@ -32,14 +32,16 @@ export class ProjectResolver {
 				.populate('applicants.position')
 				.populate('offered.dev', 'id name avatar')
 				.populate('offered.position')
-				.populate('tasks.dev', 'id name avatar');
+				.populate('tasks.dev', 'id name avatar')
+				.populate('tasks.comments.user', 'id name avatar');
 		} else {
 			project = await ProjectModel.findById(ctx.req.project)
 				.select('-posts -openings -applicants -offered')
 				.populate('owner', 'id name avatar')
 				.populate('members.dev', 'id name avatar')
 				.populate('previousMembers.dev', 'id name avatar')
-				.populate('tasks.dev', 'id name avatar');
+				.populate('tasks.dev', 'id name avatar')
+				.populate('tasks.comments.user', 'id name avatar');
 		}
 
 		if (!project) {

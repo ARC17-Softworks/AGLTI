@@ -102,7 +102,7 @@ export class ProjectManagerResolver {
 	@Mutation(() => Boolean)
 	@UseMiddleware(protect, authorize('OWNER'))
 	async addPosition(
-		@Arg('input') { title, description, skills }: PositionInput,
+		@Arg('input') { title, description, skills, isPrivate }: PositionInput,
 		@Ctx() ctx: MyContext
 	): Promise<Boolean> {
 		try {
@@ -118,6 +118,7 @@ export class ProjectManagerResolver {
 				skills,
 				title,
 				description,
+				isPrivate,
 			});
 
 			project!.openings!.push({ position: position.id });
@@ -227,6 +228,43 @@ export class ProjectManagerResolver {
 
 	@Mutation(() => Boolean)
 	@UseMiddleware(protect, authorize('OWNER'))
+	async addLabel(
+		@Arg('label') label: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+		if (!label.length) {
+			throw new ApolloError('label can not be empty');
+		}
+		if (project!.taskLabels!.includes(label)) {
+			throw new ApolloError('label already exists');
+		}
+
+		label = label.toUpperCase().trim();
+		project!.taskLabels!.push(label);
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
+	async deleteLabel(
+		@Arg('label') label: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+		if (!project!.taskLabels!.includes(label)) {
+			throw new ApolloError('label does not exists');
+		}
+
+		const removeIndex = project!.taskLabels!.findIndex((l) => l === label);
+		project!.taskLabels!.splice(removeIndex, 1);
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
 	async assignTask(
 		@Arg('input') { userId, title, description, startDate, dueDate }: TaskInput,
 		@Ctx() ctx: MyContext
@@ -253,13 +291,12 @@ export class ProjectManagerResolver {
 
 	@Mutation(() => Boolean)
 	@UseMiddleware(protect, authorize('OWNER'))
-	async returnTask(
+	async setTaskLabels(
 		@Arg('taskId') taskId: string,
-		@Arg('note') note: string,
+		@Arg('labels', () => [String], { nullable: 'items' }) labels: string[],
 		@Ctx() ctx: MyContext
 	): Promise<Boolean> {
 		const project = await ProjectModel.findById(ctx.req.project);
-
 		const task = (
 			project!.tasks as Task[] as unknown as Types.DocumentArray<
 				DocumentType<Project>
@@ -269,19 +306,129 @@ export class ProjectManagerResolver {
 		if (!task) {
 			throw new ApolloError('task not found');
 		}
-		if (task.status != 'DONE') {
-			throw new ApolloError('task not done can not return');
+
+		const taskIndex = project!.tasks!.findIndex((t) => t === task);
+
+		project!.tasks![taskIndex].labels = labels;
+
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
+	async addCheckListItem(
+		@Arg('taskId') taskId: string,
+		@Arg('description') description: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+		const task = (
+			project!.tasks as Task[] as unknown as Types.DocumentArray<
+				DocumentType<Project>
+			>
+		).id(taskId) as unknown as Task;
+
+		if (!task) {
+			throw new ApolloError('task not found');
+		}
+
+		if (description.length < 3) {
+			throw new ApolloError('please enter description');
 		}
 
 		const taskIndex = project!.tasks!.findIndex((t) => t === task);
 
-		if (!note) {
-			throw new ApolloError('to send back task note is required');
+		project!.tasks![taskIndex].checkList!.push({ description });
+
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
+	async removeCheckListItem(
+		@Arg('taskId') taskId: string,
+		@Arg('checklistId') checklistId: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+		const task = (
+			project!.tasks as Task[] as unknown as Types.DocumentArray<
+				DocumentType<Project>
+			>
+		).id(taskId) as unknown as Task;
+
+		if (!task) {
+			throw new ApolloError('task not found');
+		}
+		if (task.status === 'COMPLETE') {
+			throw new ApolloError('can not delete completed task');
 		}
 
-		project!.tasks![taskIndex].status = 'DOING';
-		project!.tasks![taskIndex].note = note;
-		project!.tasks![taskIndex].read = false;
+		const taskIndex = project!.tasks!.findIndex((t) => t === task);
+		const removeIndex = project!.tasks![taskIndex].checkList!.findIndex(
+			(cl) => cl.id === checklistId
+		);
+
+		project!.tasks![taskIndex].checkList!.splice(removeIndex, 1);
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
+	async editTask(
+		@Arg('taskId') taskId: string,
+		@Arg('input') { userId, title, description, startDate, dueDate }: TaskInput,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+		const task = (
+			project!.tasks as Task[] as unknown as Types.DocumentArray<
+				DocumentType<Project>
+			>
+		).id(taskId) as unknown as Task;
+
+		if (!task) {
+			throw new ApolloError('task not found');
+		}
+
+		const taskIndex = project!.tasks!.findIndex((t) => t === task);
+
+		project!.tasks![taskIndex].dev = userId as unknown as Ref<User>;
+		project!.tasks![taskIndex].title = title;
+		project!.tasks![taskIndex].description = description;
+		project!.tasks![taskIndex].startDate = startDate;
+		project!.tasks![taskIndex].dueDate = dueDate;
+
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
+	async deleteTask(
+		@Arg('taskId') taskId: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+		const task = (
+			project!.tasks as Task[] as unknown as Types.DocumentArray<
+				DocumentType<Project>
+			>
+		).id(taskId) as unknown as Task;
+
+		if (!task) {
+			throw new ApolloError('task not found');
+		}
+		if (task.status === 'COMPLETE') {
+			throw new ApolloError('can not delete completed task');
+		}
+
+		const removeIndex = project!.tasks!.findIndex((t) => t === task);
+
+		project!.tasks!.splice(removeIndex, 1);
 		await project!.save();
 		return true;
 	}
@@ -302,13 +449,102 @@ export class ProjectManagerResolver {
 		if (!task) {
 			throw new ApolloError('task not found');
 		}
-		if (task.status != 'DONE') {
-			throw new ApolloError('task not done can not close');
+		if (task.checkList!.some((item) => item.checked === false)) {
+			throw new ApolloError('task checklist not complete can not close');
 		}
 
 		const taskIndex = project!.tasks!.findIndex((t) => t === task);
 
 		project!.tasks![taskIndex].status = 'COMPLETE';
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
+	async addColumn(
+		@Arg('column') column: string,
+		@Arg('columnPos') columnPos: number,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+
+		column = column.toUpperCase();
+
+		if (project!.taskColumns!.includes(column)) {
+			throw new ApolloError('column already exists');
+		}
+
+		if (columnPos > project!.taskColumns!.length - 1) {
+			throw new ApolloError('invalid position');
+		}
+
+		project!.taskColumns!.splice(columnPos, 0, column);
+
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
+	async moveColumn(
+		@Arg('column') column: string,
+		@Arg('columnPos') columnPos: number,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+
+		if (!project!.taskColumns!.includes(column)) {
+			throw new ApolloError('column not found');
+		}
+
+		if (columnPos > project!.taskColumns!.length - 1) {
+			throw new ApolloError('invalid position');
+		}
+
+		const columnDelIndex = project!.taskColumns!.findIndex((c) => c === column);
+
+		project!.taskColumns!.splice(columnDelIndex, 1);
+		project!.taskColumns!.splice(columnPos, 0, column);
+
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('OWNER'))
+	async deleteColumn(
+		@Arg('column') column: string,
+		@Arg('deleteTasks') deleteTasks: boolean,
+		@Arg('shiftColumn', { nullable: true }) shiftColumn: string,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+
+		if (!project!.taskColumns!.includes(column)) {
+			throw new ApolloError('column not found');
+		}
+
+		if (column === 'COMPLETE' || column === 'TODO') {
+			throw new ApolloError('can not delete this column');
+		}
+
+		if (deleteTasks) {
+			project!.tasks = project!.tasks!.filter((task) => task.status !== column);
+			project!.taskColumns = project!.taskColumns!.filter((c) => c !== column);
+		} else {
+			if (!project!.taskColumns!.includes(shiftColumn)) {
+				throw new ApolloError('column not found');
+			}
+
+			for (const task of project!.tasks!) {
+				if (task.status === column) {
+					task.status = shiftColumn;
+				}
+			}
+
+			project!.taskColumns = project!.taskColumns!.filter((c) => c !== column);
+		}
 		await project!.save();
 		return true;
 	}

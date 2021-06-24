@@ -11,16 +11,54 @@ import { ProfileModel } from '../../entities/Profile';
 export class DeveloperResolver {
 	@Mutation(() => Boolean)
 	@UseMiddleware(protect, authorize('MEMBER'))
-	async pushTask(
+	async moveTask(
 		@Arg('taskId') taskId: string,
+		@Arg('column') column: string,
 		@Ctx() ctx: MyContext
 	): Promise<Boolean> {
 		const project = await ProjectModel.findById(ctx.req.project);
 
-		const task = ((((project!
-			.tasks as Task[]) as unknown) as Types.DocumentArray<
-			DocumentType<Project>
-		>).id(taskId) as unknown) as Task;
+		const task = (
+			project!.tasks as Task[] as unknown as Types.DocumentArray<
+				DocumentType<Project>
+			>
+		).id(taskId) as unknown as Task;
+
+		if (!task) {
+			throw new ApolloError('task not found');
+		}
+
+		if (task.dev!.toString() != ctx.req.user!.id.toString()) {
+			throw new ApolloError('task does not belong to user');
+		}
+
+		if (column === 'COMPLETE') {
+			throw new ApolloError('Not Authorized');
+		}
+
+		const taskIndex = project!.tasks!.findIndex((t) => t === task);
+
+		project!.tasks![taskIndex].status = column;
+
+		await project!.save();
+		return true;
+	}
+
+	@Mutation(() => Boolean)
+	@UseMiddleware(protect, authorize('MEMBER'))
+	async checkCheckListItem(
+		@Arg('taskId') taskId: string,
+		@Arg('checklistId') checklistId: string,
+		@Arg('checkState') checkState: boolean,
+		@Ctx() ctx: MyContext
+	): Promise<Boolean> {
+		const project = await ProjectModel.findById(ctx.req.project);
+
+		const task = (
+			project!.tasks as Task[] as unknown as Types.DocumentArray<
+				DocumentType<Project>
+			>
+		).id(taskId) as unknown as Task;
 
 		if (!task) {
 			throw new ApolloError('task not found');
@@ -31,14 +69,11 @@ export class DeveloperResolver {
 		}
 
 		const taskIndex = project!.tasks!.findIndex((t) => t === task);
+		const checkListIndex = project!.tasks![taskIndex].checkList!.findIndex(
+			(cl) => cl.id === checklistId
+		);
 
-		if (project!.tasks![taskIndex].status === 'TODO') {
-			project!.tasks![taskIndex].status = 'DOING';
-			project!.tasks![taskIndex].read = true;
-		} else if (project!.tasks![taskIndex].status === 'DOING') {
-			project!.tasks![taskIndex].status = 'DONE';
-			project!.tasks![taskIndex].note = undefined;
-		}
+		project!.tasks![taskIndex].checkList![checkListIndex].checked = checkState;
 
 		await project!.save();
 		return true;

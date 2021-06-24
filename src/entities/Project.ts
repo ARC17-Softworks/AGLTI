@@ -56,48 +56,17 @@ export class Offered {
 }
 
 @ObjectType()
-export class Task {
-	@Field(() => ID)
+export class CheckListItem {
+	@Field(() => ID, { nullable: true })
 	id?: string;
 
-	@Field(() => User)
-	@prop({ type: () => User, ref: () => User, required: true })
-	dev!: Ref<User>;
-
 	@Field()
-	@prop({ trim: true, required: [true, 'please add a title'] })
-	title!: string;
-
-	@Field()
-	@prop({
-		trim: true,
-		minlength: [50, 'description should be at least 50 characters'],
-		required: [true, 'please add a description'],
-	})
+	@prop({ trim: true, required: [true, 'please add your description'] })
 	description!: string;
-
-	@Field({ nullable: true })
-	@prop({
-		trim: true,
-		minlength: 10,
-	})
-	note?: string;
-
-	@Field()
-	@prop({ enum: ['TODO', 'DOING', 'DONE', 'COMPLETE'], default: 'TODO' })
-	status?: string;
-
-	@Field()
-	@prop({ default: Date.now })
-	startDate?: Date;
-
-	@Field({ nullable: true })
-	@prop()
-	dueDate?: Date;
 
 	@Field()
 	@prop({ default: false })
-	read?: boolean;
+	checked?: boolean;
 }
 
 @ObjectType()
@@ -115,6 +84,10 @@ export class Comment {
 		required: [true, 'please add comment text'],
 	})
 	text!: string;
+
+	@Field()
+	@prop({ default: false })
+	edited?: boolean;
 
 	@Field()
 	@prop({ default: Date.now })
@@ -137,10 +110,18 @@ export class Post {
 	@Field()
 	@prop({
 		trim: true,
-		minlength: 50,
+		minlength: 20,
 		required: [true, 'please add a post body'],
 	})
 	text!: string;
+
+	@Field()
+	@prop({ default: false })
+	edited?: boolean;
+
+	@Field()
+	@prop({ default: 0 })
+	commentCount?: number;
 
 	@Field(() => [Comment], { nullable: true })
 	@prop({ type: () => [Comment] })
@@ -149,6 +130,56 @@ export class Post {
 	@Field()
 	@prop({ default: Date.now })
 	date?: Date;
+}
+
+@ObjectType()
+export class Task {
+	@Field(() => ID)
+	id?: string;
+
+	@Field(() => User)
+	@prop({ type: () => User, ref: () => User, required: true })
+	dev!: Ref<User>;
+
+	@Field()
+	@prop({ trim: true, required: [true, 'please add a title'] })
+	title!: string;
+
+	@Field()
+	@prop({
+		trim: true,
+		minlength: [20, 'description should be at least 50 characters'],
+		required: [true, 'please add a description'],
+	})
+	description!: string;
+
+	@Field(() => [String])
+	@prop({ type: () => [String] })
+	labels?: string[];
+
+	@Field()
+	@prop({ enum: ['TODO', 'DOING', 'DONE', 'COMPLETE'], default: 'TODO' })
+	status?: string;
+
+	@Field({ nullable: true })
+	@prop({ default: Date.now })
+	startDate?: Date;
+
+	@Field({ nullable: true })
+	@prop()
+	dueDate?: Date;
+
+	@Field(() => [CheckListItem], { nullable: true })
+	@prop({ type: () => [CheckListItem] })
+	checkList?: CheckListItem[];
+
+	@Field(() => [Comment], { nullable: true })
+	@prop({ type: () => [Comment] })
+	comments?: Comment[];
+
+	@Field()
+	@prop({ default: false })
+	read?: boolean;
 }
 
 @ObjectType()
@@ -203,6 +234,13 @@ export class Project {
 		default: ['TODO', 'DOING', 'DONE', 'COMPLETE'],
 	})
 	taskColumns?: string[];
+
+	@Field(() => [String])
+	@prop({
+		type: () => [String],
+		default: ['URGENT', 'BUG FIX', 'BLOCKER', 'ON HOLD'],
+	})
+	taskLabels?: string[];
 
 	@Field(() => [Task], { nullable: true })
 	@prop({ type: () => [Task] })

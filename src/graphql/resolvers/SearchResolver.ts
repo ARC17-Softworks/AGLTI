@@ -135,6 +135,7 @@ export class SearchResolver {
 				{ skills: { $all: qskills } },
 			],
 			_id: { $nin: exclude },
+			isPrivate: false,
 		});
 
 		const positions = await PostionModel.find({
@@ -143,6 +144,7 @@ export class SearchResolver {
 				{ skills: { $all: qskills } },
 			],
 			_id: { $nin: exclude },
+			isPrivate: false,
 		})
 			.skip(startIndex)
 			.limit(limit)
