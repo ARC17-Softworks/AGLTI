@@ -70,7 +70,7 @@ export async function sendEmail(options: sendEmailOptions) {
 							"
 						>
 							<img
-								src="https://raw.githubusercontent.com/ARC17-Softworks/AGLTI_resources/master/emailTemplate/img/aglti.png"
+								src="https://raw.githubusercontent.com/Bilal-Z/AGLTI_resources/master/emailTemplate/img/aglti.png"
 								alt="AGLTI | CONNECT.COLLABORATE.CREATE."
 								width="100%"
 								height="auto"
@@ -147,11 +147,11 @@ export async function sendEmail(options: sendEmailOptions) {
 									</td>
 									<td align="right">
 										<a
-											href="https://github.com/ARC17-Softworks/AGLTI"
+											href="https://github.com/Bilal-Z/AGLTI-backend"
 											target="_blank"
 										>
 											<img
-												src="https://raw.githubusercontent.com/ARC17-Softworks/AGLTI_resources/master/emailTemplate/img/GitHub.png"
+												src="https://raw.githubusercontent.com/Bilal-Z/AGLTI_resources/master/emailTemplate/img/GitHub.png"
 												alt="GitHub"
 												width="38"
 												height="38"
